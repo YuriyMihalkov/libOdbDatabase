@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(ObjectTestProject LANGUAGES CXX)
+project(OdbDatabase LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -103,39 +103,52 @@ endforeach()
 file(WRITE "${AUTO_INCLUDES_FILE}" "${AUTO_INCLUDES_CONTENT}")
 
 # Создаем статическую библиотеку из сгенерированных ODB файлов
-add_library(OdbGeneratedObjects STATIC ${ALL_ODB_SOURCES})
+add_library(${PROJECT_NAME} STATIC ${ALL_ODB_SOURCES})
 
-target_include_directories(OdbGeneratedObjects PUBLIC 
+target_include_directories(${PROJECT_NAME} PUBLIC 
     "${CMAKE_CURRENT_BINARY_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${ENTIRES_PATH}"
 )
 
-target_link_libraries(OdbGeneratedObjects PUBLIC
+target_link_libraries(${PROJECT_NAME} PUBLIC
     ${ODB_LIBRARIES}
     ${ODB_PGSQL_LIBRARIES}
 )
 
-# Основной исполняемый файл
-add_executable(ObjectTestProject main.cpp)
+# # Основной исполняемый файл
+# add_library(ObjectTestProject SHARED main.cpp)
 
-# Насильно внедряем сгенерированную карту инклюдов во все файлы исполняемого проекта.
-# Это избавит от необходимости писать #include в main.cpp вручную!
-target_compile_options(ObjectTestProject PRIVATE
-    "SHELL:-include ${AUTO_INCLUDES_FILE}"
-)
+# # Насильно внедряем сгенерированную карту инклюдов во все файлы исполняемого проекта.
+# # Это избавит от необходимости писать #include в main.cpp вручную!
+# target_compile_options(ObjectTestProject PRIVATE
+#     "SHELL:-include ${AUTO_INCLUDES_FILE}"
+# )
 
-target_include_directories(ObjectTestProject PRIVATE 
-    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    "${ENTIRES_PATH}"             
-    "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    "${CMAKE_CURRENT_BINARY_DIR}"
-)
+# target_include_directories(ObjectTestProject PRIVATE 
+#     "${CMAKE_CURRENT_SOURCE_DIR}/include"
+#     "${ENTIRES_PATH}"             
+#     "${CMAKE_CURRENT_SOURCE_DIR}/src"
+#     "${CMAKE_CURRENT_BINARY_DIR}"
+# )
 
-# Линкуем сгенерированную библиотеку.
-# target_link_libraries гарантирует, что сначала запустятся add_custom_command,
-# файлы сгенерируются, и только потом начнется компиляция main.cpp
-target_link_libraries(ObjectTestProject PRIVATE 
-    OdbGeneratedObjects
-)
+# # Линкуем сгенерированную библиотеку.
+# # target_link_libraries гарантирует, что сначала запустятся add_custom_command,
+# # файлы сгенерируются, и только потом начнется компиляция main.cpp
+# target_link_libraries(ObjectTestProject PRIVATE 
+#     OdbGeneratedObjects
+# )
+
+# =====================================================================
+# 4. Тесты
+# =====================================================================
+
+option(ODB_DATABASE_DISABLE_TEST "Disable tests" FALSE)
+
+if(NOT ODB_DATABASE_DISABLE_TEST)
+    find_package(GTest CONFIG REQUIRED)
+    include(CTest)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

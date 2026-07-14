@@ -88,3 +88,32 @@ function(get_hpp_files_in_dir dir_path result_var)
     # Возвращаем список файлов в родительскую область видимости
     set(${result_var} "${filtered_files}" PARENT_SCOPE)
 endfunction()
+
+function(add_test_exe NAME)
+    cmake_parse_arguments(T "" "" "SOURCES;LIBS;DEFS;LABELS" ${ARGN})
+
+    set(ABS_SOURCES)
+    foreach(src IN LISTS T_SOURCES)
+        if(IS_ABSOLUTE "${src}")
+            list(APPEND ABS_SOURCES "${src}")
+        else()
+            list(APPEND ABS_SOURCES "${CMAKE_SOURCE_DIR}/${src}")
+        endif()
+    endforeach()
+
+    add_executable(${NAME} ${ABS_SOURCES})
+
+    target_link_libraries(${NAME} PUBLIC ${COMMON_LIBS} ${T_LIBS})
+
+    target_include_directories(${NAME} PRIVATE ${COMMON_DIRECTORIES})
+
+    if(T_DEFS)
+        target_compile_definitions(${NAME} PRIVATE ${T_DEFS})
+    endif()
+
+    add_test(NAME ${NAME} COMMAND ${NAME}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests)
+    if (T_LABELS)
+        set_tests_properties(${NAME} PROPERTIES LABELS "${T_LABELS}")
+    endif()
+endfunction()

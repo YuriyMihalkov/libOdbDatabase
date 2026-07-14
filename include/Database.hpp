@@ -11,10 +11,11 @@ public:
     #pragma db id auto
     unsigned long id = 0;
 
-    template <typename T> void save();
-    template <typename T> void update();
-    template <typename T> void remove();
-    
+    template <typename T> bool save();
+    template <typename T> bool update();
+    template <typename T> bool remove();
+    template <typename T> bool clear();
+
     template <typename T> static std::shared_ptr<T> get(unsigned long id);
     template <typename T> static std::vector<std::shared_ptr<T>> getAll();
 };
