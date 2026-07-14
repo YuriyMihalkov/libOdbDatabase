@@ -9,7 +9,9 @@
 #include "User-odb.hxx" 
 
 class DatabaseTest : public ::testing::Test {
-
+    void SetUp() override {
+        Database::dropAllTable<User>();
+    }
 };
 
 // 1. Тест успешного получения объекта по ID (get)

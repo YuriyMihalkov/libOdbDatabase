@@ -18,6 +18,8 @@ public:
 
     template <typename T> static std::shared_ptr<T> get(unsigned long id);
     template <typename T> static std::vector<std::shared_ptr<T>> getAll();
+
+    template <typename T> static void dropAllTable();
 };
 
 #ifndef ODB_COMPILER

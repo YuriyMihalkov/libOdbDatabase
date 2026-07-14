@@ -17,7 +17,7 @@ public:
     }
 
     // Метод получения ссылки на объект БД для выполнения запросов
-    odb::database& get_db() {
+    odb::database& getDatabase() {
         return *dataBase_;
     }
 
