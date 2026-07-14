@@ -20,5 +20,5 @@ public:
 };
 
 #ifndef ODB_COMPILER
-    #include "DatabaseImpl.tpp"
+    #include "../src/DatabaseImpl.tpp"
 #endif

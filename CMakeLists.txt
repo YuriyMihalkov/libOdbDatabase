@@ -12,8 +12,7 @@ endforeach()
 
 find_package(ODB REQUIRED COMPONENTS pgsql)
 
-# Инициализируем общий список исходников. 
-# Заранее вносим туда файл Database-odb.cxx, чтобы таргет НИКОГДА не был пустым!
+# Инициализируем список исходников сгенерированной библиотеки
 set(ALL_ODB_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/Database-odb.cxx")
 
 # =====================================================================
@@ -35,35 +34,32 @@ add_custom_command(
             --schema-format embedded
             --schema-name app
             --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
+            -I "${CMAKE_CURRENT_SOURCE_DIR}/include"  # Исправлено: путь к папке с Database.hpp
             -I "${CMAKE_CURRENT_SOURCE_DIR}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/Database.hpp"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Database.hpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
     COMMENT "Генерация ODB файлов для Database.hpp"
     VERBATIM
 )
-
 
 # =====================================================================
 # 2. Динамическая генерация для сущностей из entities_database
 # =====================================================================
 find_unique_entities_database_dir(ENTIRES_PATH)
 
-# Собираем hpp файлы прямо здесь, чтобы избежать багов с областями видимости функций
 file(GLOB ENTIRES_PATHS
      CONFIGURE_DEPENDS
      "${ENTIRES_PATH}/*.hpp"
 )
 
-# Проверяем, что файлы вообще есть
 list(LENGTH ENTIRES_PATHS files_count)
 if(files_count EQUAL 0)
     message(FATAL_ERROR "Ошибка сборки: В директории '${ENTIRES_PATH}' не найдено ни одного файла *.hpp!")
 endif()
 
 foreach(header IN LISTS ENTIRES_PATHS)
-    get_filename_component(name_we "${header}" NAME_WE)
+    get_filename_component(name_we "${header}" NAME_WLE)
     
-    # Пути к файлам, которые создаст ODB для этой сущности
     set(generated_cxx "${CMAKE_CURRENT_BINARY_DIR}/${name_we}-odb.cxx")
     set(generated_hxx "${CMAKE_CURRENT_BINARY_DIR}/${name_we}-odb.hxx")
     set(generated_ixx "${CMAKE_CURRENT_BINARY_DIR}/${name_we}-odb.ixx")
@@ -75,52 +71,71 @@ foreach(header IN LISTS ENTIRES_PATHS)
                 -d pgsql 
                 --generate-query 
                 --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
+                -I "${CMAKE_CURRENT_SOURCE_DIR}/include" # Чтобы ODB видел Database.hpp
                 -I "${CMAKE_CURRENT_SOURCE_DIR}"
                 -I "${ENTIRES_PATH}"
                 "${header}"
-        DEPENDS "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Database.hpp"
+        DEPENDS "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp" ${DATABASE_GENERATED}
         COMMENT "Generating ODB files for ${name_we}"
         VERBATIM
     )
     
-    # Добавляем сгенерированный файл в общий список
     list(APPEND ALL_ODB_SOURCES "${generated_cxx}")
 endforeach()
 
-
 # =====================================================================
-# 3. Таргеты и их настройка
+# 3. Таргеты, автогенерация карты инклюдов и их настройка
 # =====================================================================
 
-# Создаем библиотеку (теперь в ALL_ODB_SOURCES гарантированно есть как минимум Database-odb.cxx)
+# Путь к файлу, который автоматически объединит все ODB-заголовки
+set(AUTO_INCLUDES_FILE "${CMAKE_CURRENT_BINARY_DIR}/AllOdbTraits.hxx")
+
+# Генерируем содержимое файла на лету
+set(AUTO_INCLUDES_CONTENT "//#pragma once\n// Автоматически сгенерированный файл. Не редактировать!\n")
+string(APPEND AUTO_INCLUDES_CONTENT "#include <Database-odb.hxx>\n")
+
+foreach(header IN LISTS ENTIRES_PATHS)
+    get_filename_component(name_we "${header}" NAME_WLE)
+    string(APPEND AUTO_INCLUDES_CONTENT "#include <${name_we}-odb.hxx>\n")
+endforeach()
+
+# Записываем файл на диск (обновляется только если состав папки изменился)
+file(WRITE "${AUTO_INCLUDES_FILE}" "${AUTO_INCLUDES_CONTENT}")
+
+# Создаем статическую библиотеку из сгенерированных ODB файлов
 add_library(OdbGeneratedObjects STATIC ${ALL_ODB_SOURCES})
 
-target_include_directories(OdbGeneratedObjects PRIVATE 
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${ENTIRES_PATH}"            
+target_include_directories(OdbGeneratedObjects PUBLIC 
     "${CMAKE_CURRENT_BINARY_DIR}"
-    ${ODB_INCLUDE_DIRS}          
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${ENTIRES_PATH}"
+)
+
+target_link_libraries(OdbGeneratedObjects PUBLIC
+    ${ODB_LIBRARIES}
+    ${ODB_PGSQL_LIBRARIES}
 )
 
 # Основной исполняемый файл
 add_executable(ObjectTestProject main.cpp)
 
-# Автоматически внедряем заголовки базы данных при компиляции исполняемого файла
+# Насильно внедряем сгенерированную карту инклюдов во все файлы исполняемого проекта.
+# Это избавит от необходимости писать #include в main.cpp вручную!
 target_compile_options(ObjectTestProject PRIVATE
-    "SHELL:-include ${CMAKE_CURRENT_BINARY_DIR}/Database-odb.hxx"
-    "SHELL:-include ${CMAKE_CURRENT_BINARY_DIR}/User-odb.hxx"
+    "SHELL:-include ${AUTO_INCLUDES_FILE}"
 )
 
 target_include_directories(ObjectTestProject PRIVATE 
-    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${ENTIRES_PATH}"             
-    "${CMAKE_CURRENT_BINARY_DIR}" 
-    ${ODB_INCLUDE_DIRS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
-# Линкуем все зависимости
+# Линкуем сгенерированную библиотеку.
+# target_link_libraries гарантирует, что сначала запустятся add_custom_command,
+# файлы сгенерируются, и только потом начнется компиляция main.cpp
 target_link_libraries(ObjectTestProject PRIVATE 
     OdbGeneratedObjects
-    ${ODB_LIBRARIES}
-    ${ODB_PGSQL_LIBRARIES}
 )
