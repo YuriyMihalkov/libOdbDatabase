@@ -10,7 +10,7 @@
 
 class DatabaseTest : public ::testing::Test {
     void SetUp() override {
-        Database::dropAllTable<User>();
+        Database::dropAllTable();
     }
 };
 

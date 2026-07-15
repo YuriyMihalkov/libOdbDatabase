@@ -14,6 +14,7 @@ find_package(ODB REQUIRED COMPONENTS pgsql)
 
 # Инициализируем список исходников сгенерированной библиотеки
 set(ALL_ODB_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/Database-odb.cxx")
+list(APPEND ALL_ODB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/Database.cpp")
 
 # =====================================================================
 # 1. Генерация для базового файла Database.hpp
