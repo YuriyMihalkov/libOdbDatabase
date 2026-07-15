@@ -17,6 +17,7 @@ void Database::dropAllTable() {
         for (const auto& tableName : tables) {
             Database::dropTable(tableName);
         }
+
     } catch (const std::exception& error) {
         std::cerr << "Ошибка при очистке таблиц: " << error.what() << std::endl;
     }
@@ -31,12 +32,13 @@ std::vector<std::string> Database::getTablesBySchema(const std::string& schema_n
         std::transform(lowerSchema.begin(), lowerSchema.end(), lowerSchema.begin(), 
                        [](unsigned char c){ return std::tolower(c); });
 
-        std::string sql_where = "WHERE table_schema = '" + lowerSchema + "' AND table_type = 'BASE TABLE'";
-        odb::result<SchemaTableView> result(database.query<SchemaTableView>(odb::query<SchemaTableView>(sql_where)));
+        std::string sqlWhere = "WHERE table_schema = '" + lowerSchema + "' AND table_type = 'BASE TABLE'";
+        odb::result<SchemaTableView> result(database.query<SchemaTableView>(odb::query<SchemaTableView>(sqlWhere)));
 
-        for (const SchemaTableView& row : r) {
+        for (const SchemaTableView& row : result) {
             tables.push_back(row.table_name);
         }
+        
         transaction.commit();
     } catch (const odb::exception& error) {
         std::cerr << "Ошибка при получении списка таблиц: " << error.what() << std::endl;
@@ -45,7 +47,9 @@ std::vector<std::string> Database::getTablesBySchema(const std::string& schema_n
 }
 
 void Database::dropTable(const std::string& tableName) {
-    if (tableName.empty()) return;
+    if (tableName.empty()) {
+        return;
+    }
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::connection_ptr connection = database.connection();
