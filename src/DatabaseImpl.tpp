@@ -19,6 +19,31 @@ bool Database::save() {
 }
 
 template <typename T>
+bool Database::actual() {
+    try {
+        // Проверяем, сохранен ли объект в БД (id не должен быть дефолтным нулем)
+        if (this->id == 0) {
+            std::cerr << "[Database] Ошибка actual(): невозможно актуализировать несохраненный объект." << std::endl;
+            return false;
+        }
+
+        odb::database& database = DatabaseManager::instance().getDatabase();
+        odb::transaction transaction(database.begin());
+        T& currentObject = *static_cast<T*>(this);
+        database.load<T>(this->id, currentObject);
+        transaction.commit();
+        return true;
+    } catch (const odb::object_not_persistent& error) {
+        std::cerr << "[Database] Ошибка actual(): объект с ID " << this->id 
+                  << " больше не существует в базе данных." << std::endl;
+        return false;
+    } catch (const odb::exception& error) {
+        std::cerr << "[Database] Ошибка при актуализации данных: " << error.what() << std::endl;
+        return false;
+    }
+}
+
+template <typename T>
 bool Database::update() { 
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();

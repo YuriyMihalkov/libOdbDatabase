@@ -7,10 +7,6 @@
 
 #include "Database-odb.hxx" 
 
-
-// Реализуем методы через фиктивный тип void, чтобы не привязываться к шаблону класса в заголовочнике,
-// либо реализуем их как статические функции для Database<User>:
-
 void Database::dropAllTable() {
     try {
         std::vector<std::string> tables = Database::getTablesBySchema("");
