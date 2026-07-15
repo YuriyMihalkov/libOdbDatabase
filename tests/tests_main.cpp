@@ -1,80 +1,116 @@
 #include <gtest/gtest.h>
+#include <memory>
 #include <odb/connection.hxx>
 #include <odb/transaction.hxx>
 #include <odb/pgsql/database.hxx>
 
 #include "Database.hpp"
 #include "User.hpp"
-// Включаем сгенерированную ODB схему базы данных
 #include "User-odb.hxx" 
 
 class DatabaseTest : public ::testing::Test {
     void SetUp() override {
-        Database::dropAllTable<User>();
+        Database::dropAllTable();
     }
 };
 
-// 1. Тест успешного получения объекта по ID (get)
-TEST_F(DatabaseTest, GetObjectByIdReturnsCorrectData) {
-    unsigned long saved_id = 0;
-    
+// 1. Тест успешного создания объекта 
+TEST_F(DatabaseTest, CreateDatabase) {
     // Создаем указатель на тип
     std::shared_ptr<User> user = std::make_shared<User>("Дмитрий", "dima@mail.com");
 
     // Сохраняем указатель на тип в базе данных, проверяем возвращаемый результат
     EXPECT_TRUE(user->save<User>()); 
+}
 
-    // Уничтожаем указатель
-    user.reset();
-
+// 2. Тест успешной загрузки объекта
+TEST_F(DatabaseTest, loadDataBase) {
     // Получаем данные о пользователе из базы данных
     std::vector<std::shared_ptr<User>>users = Database::getAll<User>();
 
     EXPECT_TRUE(users.size() > 0);
-
+    EXPECT_EQ(users.begin()->get()->email, "dima@mail.com");
+    EXPECT_EQ(users.begin()->get()->name, "Дмитрий");
 }
 
-// // 2. Тест получения несуществующего ID (get)
-// TEST_F(DatabaseTest, GetNonExistentIdReturnsNullptr) {
-//     odb::transaction t(db->begin());
-    
-//     // ODB при поиске несуществующего id возвращает исключение или nullptr в зависимости от метода.
-//     // Если ваш Database::get использует db->find(), он вернет nullptr.
-//     std::shared_ptr<User> retrieved = Database::get<User>(99999); 
-//     t.commit();
+// 3. Тест успешного изменения объекта
+TEST_F(DatabaseTest, UpdateDataBase) {
+    // Получаем данные о пользователе из базы данных
+    std::shared_ptr<User> user = *Database::getAll<User>().begin();
 
-//     EXPECT_EQ(retrieved, nullptr);
-// }
+    // Изменяем значение
+    user->email = "dima123@mail.com";
 
-// // 3. Тест получения всех объектов (getAll)
-// TEST_F(DatabaseTest, GetAllObjectsReturnsAllStoredEntries) {
-//     // Подготовка данных: сохраняем двух пользователей
-//     {
-//         odb::transaction t(db->begin());
-//         auto user1 = std::make_shared<User>("Bob");
-//         auto user2 = std::make_shared<User>("Charlie");
-//         db->persist(user1);
-//         db->persist(user2);
-//         t.commit();
-//     }
+    // Обновляем данные в базе
+    user->update<User>();
 
-//     // Действие: вызываем ваш тестируемый метод getAll
-//     odb::transaction t(db->begin());
-//     std::vector<std::shared_ptr<User>> all_users = Database::getAll<User>();
-//     t.commit();
+    // Сбрасываем значение указателя
+    user.reset();
 
-//     // Проверка
-//     ASSERT_EQ(all_users.size(), 2);
-//     EXPECT_EQ(all_users[0]->name, "Bob");
-//     EXPECT_EQ(all_users[1]->name, "Charlie");
-// }
+    // Загружаем новое значение из базы данных
+    user = *Database::getAll<User>().begin();
+    EXPECT_EQ(user->email, "dima123@mail.com");
+}
 
-// // 4. Тест получения списка из пустой таблицы (getAll)
-// TEST_F(DatabaseTest, GetAllObjectsWhenEmptyReturnsEmptyVector) {
-//     odb::transaction t(db->begin());
-//     std::vector<std::shared_ptr<User>> all_users = Database::getAll<User>();
-//     t.commit();
+// 4. Тест попытки загрузки несуществующего объекта
+TEST_F(DatabaseTest, LoadNotExistDatabase) {
+    std::shared_ptr<User> user = Database::get<User>(99999); 
 
-//     EXPECT_TRUE(all_users.empty());
-//     EXPECT_EQ(all_users.size(), 0);
-// }
+    EXPECT_EQ(user, nullptr);
+}
+
+// 5. Тест актуализации измененного объекта 
+TEST_F(DatabaseTest, ActualDataBase) {
+    std::shared_ptr<User> user = *Database::getAll<User>().begin();
+
+    user->email = "dima321@mail.com";
+    EXPECT_EQ(user->email, "dima321@mail.com");
+
+    user->actual<User>();
+    EXPECT_EQ(user->email, "dima123@mail.com");
+}
+
+// 6. Тест удаления записи
+TEST_F(DatabaseTest, RemoveDataBase) {
+    std::shared_ptr<User> user = std::make_shared<User>("Юрий", "yuriy@mail.com");
+
+    // Сохраняем еще одну запись
+    EXPECT_TRUE(user->save<User>()); 
+
+    // Проверяем, что записей теперь две
+    EXPECT_EQ(Database::getAll<User>().size(), 2);
+
+    for (std::shared_ptr<User> user: Database::getAll<User>()) {
+        if(user->name == "Дмитрий") {
+            user->remove<User>();
+        }
+    }
+
+    // Проверяем что запись осталась только одна
+    EXPECT_EQ(Database::getAll<User>().size(), 1);
+
+    // Проверяем что оставшееся база данных - ожидаемая
+    EXPECT_EQ(Database::getAll<User>().begin()->get()->name, "Юрий");
+}
+
+// 7. Тест очистки всех данных таблицы
+TEST_F(DatabaseTest, ClearTableDataBase) {
+    std::shared_ptr<User> user = std::make_shared<User>("Дмитрий", "dima@mail.com");
+
+    // Сохраняем еще одну запись
+    EXPECT_TRUE(user->save<User>()); 
+
+    std::shared_ptr<User> user1 = std::make_shared<User>("Петр", "Petr@mail.com");
+
+    // Сохраняем еще одну запись
+    EXPECT_TRUE(user1->save<User>()); 
+
+    // Проверяем, что записей теперь две
+    EXPECT_EQ(Database::getAll<User>().size(), 3);
+
+    // Очищаем таблицу
+    EXPECT_TRUE(Database::clear<User>());
+
+    // Проверяем что запись осталась только одна
+    EXPECT_EQ(Database::getAll<User>().size(), 0);
+}

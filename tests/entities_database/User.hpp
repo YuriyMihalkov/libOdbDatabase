@@ -2,7 +2,7 @@
 #include "Database.hpp"
 #include <string>
 
-#pragma db object table("Users")
+#pragma db object
 class User : public Database {
 public:
     std::string name;
