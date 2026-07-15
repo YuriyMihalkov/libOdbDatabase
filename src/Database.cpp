@@ -27,14 +27,14 @@ std::vector<std::string> Database::getTablesBySchema(const std::string& schema_n
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
-        std::string lower_schema = schema_name;
-        std::transform(lower_schema.begin(), lower_schema.end(), lower_schema.begin(), 
+        std::string lowerSchema = schema_name;
+        std::transform(lowerSchema.begin(), lowerSchema.end(), lowerSchema.begin(), 
                        [](unsigned char c){ return std::tolower(c); });
 
-        std::string sql_where = "WHERE table_schema = '" + lower_schema + "' AND table_type = 'BASE TABLE'";
-        odb::result<schema_table_view> r(database.query<schema_table_view>(odb::query<schema_table_view>(sql_where)));
+        std::string sql_where = "WHERE table_schema = '" + lowerSchema + "' AND table_type = 'BASE TABLE'";
+        odb::result<SchemaTableView> result(database.query<SchemaTableView>(odb::query<SchemaTableView>(sql_where)));
 
-        for (const schema_table_view& row : r) {
+        for (const SchemaTableView& row : r) {
             tables.push_back(row.table_name);
         }
         transaction.commit();
