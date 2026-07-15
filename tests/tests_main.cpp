@@ -5,7 +5,6 @@
 
 #include "Database.hpp"
 #include "User.hpp"
-// Включаем сгенерированную ODB схему базы данных
 #include "User-odb.hxx" 
 
 class DatabaseTest : public ::testing::Test {
@@ -14,25 +13,25 @@ class DatabaseTest : public ::testing::Test {
     }
 };
 
-// 1. Тест успешного получения объекта по ID (get)
-TEST_F(DatabaseTest, GetObjectByIdReturnsCorrectData) {
-    unsigned long saved_id = 0;
-    
+// 1. Тест успешного создания объекта 
+TEST_F(DatabaseTest, CreateDatabase) {
     // Создаем указатель на тип
     std::shared_ptr<User> user = std::make_shared<User>("Дмитрий", "dima@mail.com");
 
     // Сохраняем указатель на тип в базе данных, проверяем возвращаемый результат
     EXPECT_TRUE(user->save<User>()); 
+}
 
-    // Уничтожаем указатель
-    user.reset();
-
+TEST_F(DatabaseTest, loadDataBase) {
     // Получаем данные о пользователе из базы данных
     std::vector<std::shared_ptr<User>>users = Database::getAll<User>();
 
     EXPECT_TRUE(users.size() > 0);
-
+    EXPECT_TRUE(users.begin()->get()->email == "dima@mail.com");
+    EXPECT_TRUE(users.begin()->get()->name == "Дмитрий");
 }
+
+
 
 // // 2. Тест получения несуществующего ID (get)
 // TEST_F(DatabaseTest, GetNonExistentIdReturnsNullptr) {

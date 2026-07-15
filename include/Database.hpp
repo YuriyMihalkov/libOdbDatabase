@@ -20,7 +20,7 @@ public:
     template <typename T> static std::vector<std::shared_ptr<T>> getAll();
 
     static void dropAllTable();
-    static std::vector<std::string> getTablesBySchema(const std::string& schema_name);
+    static std::vector<std::string> getTablesBySchema(const std::string& schemaName);
     static void dropTable(const std::string& tableName);
 };
 

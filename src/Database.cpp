@@ -13,7 +13,7 @@
 
 void Database::dropAllTable() {
     try {
-        std::vector<std::string> tables = Database::getTablesBySchema("app");
+        std::vector<std::string> tables = Database::getTablesBySchema("");
         for (const auto& tableName : tables) {
             Database::dropTable(tableName);
         }
@@ -23,12 +23,12 @@ void Database::dropAllTable() {
     }
 }
 
-std::vector<std::string> Database::getTablesBySchema(const std::string& schema_name) {
+std::vector<std::string> Database::getTablesBySchema(const std::string& schemaName) {
     std::vector<std::string> tables;
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
-        std::string lowerSchema = schema_name;
+        std::string lowerSchema = schemaName;
         std::transform(lowerSchema.begin(), lowerSchema.end(), lowerSchema.begin(), 
                        [](unsigned char c){ return std::tolower(c); });
 
