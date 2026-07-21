@@ -135,8 +135,8 @@ int main() {
 
 ```bash
 # 1. Клонируйте репозиторий
-git clone <url_вашего_репозитория>
-cd <имя_папки_проекта>
+git clone git@github.com:YuriyMihalkov/libOdbDatabase.git
+cd libOdbDatabase
 
 # 2. Создайте директорию для сборки
 mkdir build && cd build
