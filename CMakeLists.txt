@@ -31,7 +31,9 @@ add_custom_command(
             --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
             -I "${CMAKE_CURRENT_SOURCE_DIR}/include" -I "${CMAKE_CURRENT_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/DataBaseQuery.hpp"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/DataBaseQuery.hpp"
     VERBATIM
 )
 

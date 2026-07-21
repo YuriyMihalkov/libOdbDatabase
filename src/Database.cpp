@@ -10,6 +10,8 @@
 // Определение статического мьютекса
 std::mutex Database::dbMutex;
 
+
+
 void Database::dropAllTable() {
     try {
         std::vector<std::string> tables = Database::getTablesBySchema("");
@@ -64,3 +66,4 @@ void Database::dropTable(const std::string& tableName) {
         std::cerr << "Ошибка при удалении таблицы \"" << tableName << "\": " << error.what() << std::endl;
     }
 }
+
