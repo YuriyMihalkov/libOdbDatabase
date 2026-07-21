@@ -1,28 +1,35 @@
 stages:
   - show_dir
   - build
+  - test
 
+# ==========================================
+# ИНФОРМАЦИЯ О ДИРЕКТОРИЯХ
+# ==========================================
 show_dir_linux:
   stage: show_dir
   script:
     - pwd
   tags:
-    - Debian13Runner # Тег для Linux из вашего скриншота
+    - Debian13Runner # Тег для Linux
 
 show_dir_win10:
   stage: show_dir
   script:
     - Get-Location
   tags:
-    - Windows10 # Тег для Windows 10 из вашего скриншота
+    - Windows10 # Тег для Windows 10
 
 show_dir_win11:
   stage: show_dir
   script:
     - Get-Location
   tags:
-    - Windows11 # Тег для Windows 11 из вашего скриншота
+    - Windows11 # Тег для Windows 11
 
+# ==========================================
+# СБОРКА 
+# ==========================================
 build-debian13:
   stage: build
   interruptible: true
@@ -51,7 +58,7 @@ build-debian13:
     paths:
       - build/
   tags:
-    - Debian13Runner # Тег для Linux из вашего скриншота
+    - Debian13Runner 
       
 build-windows10:
   stage: build
@@ -73,7 +80,7 @@ build-windows10:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    - New-Item -ItemType Directory -Force -Path build  # Безопасное создание папки
+    - New-Item -ItemType Directory -Force -Path build  
     - cd build
   script:
     - bash
@@ -83,7 +90,7 @@ build-windows10:
     paths:
       - build/
   tags:
-    - Windows10 # Тег для Windows 10 из вашего скриншота
+    - Windows10
 
 build-windows11:
   stage: build
@@ -105,7 +112,7 @@ build-windows11:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    - New-Item -ItemType Directory -Force -Path build  # Безопасное создание папки
+    - New-Item -ItemType Directory -Force -Path build
     - cd build
   script:
     - bash
@@ -115,4 +122,43 @@ build-windows11:
     paths:
       - build/
   tags:
-    - Windows11 # Тег для Windows 11 из вашего скриншота
+    - Windows11
+
+# ==========================================
+# ТЕСТИРОВАНИЕ 
+# ==========================================
+test-debian13:
+  stage: test
+  interruptible: true
+  needs:
+    - job: build-debian13 
+      artifacts: true
+  script:
+    - cd build
+    - ctest --output-on-failure 
+  tags:
+    - Debian13Runner
+
+test-windows10:
+  stage: test
+  interruptible: true
+  needs:
+    - job: build-windows10 
+      artifacts: true
+  script:
+    - cd build
+    - bash -c "ctest --output-on-failure" 
+  tags:
+    - Windows10
+
+test-windows11:
+  stage: test
+  interruptible: true
+  needs:
+    - job: build-windows11 
+      artifacts: true
+  script:
+    - cd build
+    - bash -c "ctest --output-on-failure"
+  tags:
+    - Windows11
