@@ -1,0 +1,118 @@
+stages:
+  - show_dir
+  - build
+
+show_dir_linux:
+  stage: show_dir
+  script:
+    - pwd
+  tags:
+    - Debian13Runner # Тег для Linux из вашего скриншота
+
+show_dir_win10:
+  stage: show_dir
+  script:
+    - Get-Location
+  tags:
+    - Windows10 # Тег для Windows 10 из вашего скриншота
+
+show_dir_win11:
+  stage: show_dir
+  script:
+    - Get-Location
+  tags:
+    - Windows11 # Тег для Windows 11 из вашего скриншота
+
+build-debian13:
+  stage: build
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+        CMAKE_GENERATOR: "Unix Makefiles"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_GENERATOR: "Unix Makefiles"
+  before_script:
+    - ls -la ./
+    - mkdir build && cd build
+  script:
+    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - Debian13Runner # Тег для Linux из вашего скриншота
+      
+build-windows10:
+  stage: build
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+        CMAKE_GENERATOR: "MinGW Makefiles"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_GENERATOR: "MinGW Makefiles"
+  before_script:
+    - Get-ChildItem ./                 
+    - New-Item -ItemType Directory -Force -Path build  # Безопасное создание папки
+    - cd build
+  script:
+    - bash
+    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - Windows10 # Тег для Windows 10 из вашего скриншота
+
+build-windows11:
+  stage: build
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+        CMAKE_GENERATOR: "MinGW Makefiles"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_GENERATOR: "MinGW Makefiles"
+  before_script:
+    - Get-ChildItem ./                 
+    - New-Item -ItemType Directory -Force -Path build  # Безопасное создание папки
+    - cd build
+  script:
+    - bash
+    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - Windows11 # Тег для Windows 11 из вашего скриншота
