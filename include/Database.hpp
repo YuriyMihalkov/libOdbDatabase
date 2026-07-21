@@ -47,6 +47,11 @@ private:
     static std::mutex dbMutex; ///< Мьютекс для синхронизации доступа к операциям БД.
 };
 
+#pragma db view query("SELECT table_name FROM information_schema.tables")
+struct SchemaTableView {
+    std::string table_name; 
+};
+
 #ifndef ODB_COMPILER
     #include "../src/DatabaseImpl.tpp"
 #endif
