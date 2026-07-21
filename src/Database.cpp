@@ -7,9 +7,13 @@
 
 #include "Database-odb.hxx" 
 
+// Определение статического мьютекса
+std::mutex Database::dbMutex;
+
 void Database::dropAllTable() {
     try {
         std::vector<std::string> tables = Database::getTablesBySchema("");
+        std::lock_guard<std::mutex> lock(dbMutex);
         for (const auto& tableName : tables) {
             Database::dropTable(tableName);
         }
@@ -21,6 +25,7 @@ void Database::dropAllTable() {
 
 std::vector<std::string> Database::getTablesBySchema(const std::string& schemaName) {
     std::vector<std::string> tables;
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
@@ -46,6 +51,7 @@ void Database::dropTable(const std::string& tableName) {
     if (tableName.empty()) {
         return;
     }
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::connection_ptr connection = database.connection();

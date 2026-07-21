@@ -1,3 +1,19 @@
 {
-    "cmake.ctest.neverDebugTestsWithLaunchConfiguration": true
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "clangd.arguments": [
+        "-background-index",
+        "-compile-commands-dir=debug"
+    ],
+    "cmake.configureSettings": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
+        "CMAKE_CXX_COMPYLER": "clang++",
+        //"CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_POLICY_VERSION_MINIMUM": 3.5,
+        //"SANITIZER_TYPE": "Address",
+        //"SANITIZER_TYPE": "Thread"
+    },
+    "[dockercompose]": {
+        "editor.tabSize": 2
+    }
 }

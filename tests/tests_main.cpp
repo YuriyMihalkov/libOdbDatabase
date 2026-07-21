@@ -17,10 +17,10 @@ class DatabaseTest : public ::testing::Test {
 // 1. Тест успешного создания объекта 
 TEST_F(DatabaseTest, CreateDatabase) {
     // Создаем указатель на тип
-    std::shared_ptr<User> user = std::make_shared<User>("Дмитрий", "dima@mail.com");
+    User user("Дмитрий", "dima@mail.com");
 
     // Сохраняем указатель на тип в базе данных, проверяем возвращаемый результат
-    EXPECT_TRUE(user->save<User>()); 
+    EXPECT_TRUE(user.save<User>()); 
 }
 
 // 2. Тест успешной загрузки объекта
@@ -111,6 +111,6 @@ TEST_F(DatabaseTest, ClearTableDataBase) {
     // Очищаем таблицу
     EXPECT_TRUE(Database::clear<User>());
 
-    // Проверяем что запись осталась только одна
+    // Проверяем что не осталось не одной записи в таблице
     EXPECT_EQ(Database::getAll<User>().size(), 0);
 }

@@ -6,6 +6,7 @@
 
 template <typename T>
 bool Database::save() { 
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
@@ -20,6 +21,7 @@ bool Database::save() {
 
 template <typename T>
 bool Database::actual() {
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         // Проверяем, сохранен ли объект в БД (id не должен быть дефолтным нулем)
         if (this->id == 0) {
@@ -45,6 +47,7 @@ bool Database::actual() {
 
 template <typename T>
 bool Database::update() { 
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
@@ -59,6 +62,7 @@ bool Database::update() {
 
 template <typename T>
 bool Database::remove() { 
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
@@ -73,6 +77,7 @@ bool Database::remove() {
 
 template <typename T>
 bool Database::clear() {
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
@@ -87,6 +92,7 @@ bool Database::clear() {
 
 template <typename T>
 std::shared_ptr<T> Database::get(unsigned long id) {
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
@@ -105,6 +111,7 @@ std::shared_ptr<T> Database::get(unsigned long id) {
 template <typename T>
 std::vector<std::shared_ptr<T>> Database::getAll() {
     std::vector<std::shared_ptr<T>> result;
+    std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
@@ -112,6 +119,7 @@ std::vector<std::shared_ptr<T>> Database::getAll() {
         for (auto& obj : r) {
             result.push_back(std::make_shared<T>(obj)); 
         }
+        
         transaction.commit();
     } catch (const odb::exception& error) {
         std::cerr << error.what() << std::endl;
