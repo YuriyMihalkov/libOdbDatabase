@@ -8,9 +8,11 @@ class DatabaseManager {
 public:
     // Запрещаем копирование синглтона
     DatabaseManager(const DatabaseManager&) = delete;
+
+    // Запрещаем присваивание синглтона
     DatabaseManager& operator=(const DatabaseManager&) = delete;
 
-    // Глобальная точка доступа к менеджеру
+    // Метод получения единственного экземпляра синглтона
     static DatabaseManager& instance() {
         static DatabaseManager instance;
         return instance;
@@ -22,9 +24,9 @@ public:
     }
 
 private:
-    std::unique_ptr<odb::database> dataBase_;
+    std::unique_ptr<odb::database> dataBase_; ///< Умный указатель на объект базы данных
 
-    // Приватный конструктор: вся магия автоматической инициализации происходит здесь
+    /// Конструктор синглтона, который инициализирует соединение с базой данных
     DatabaseManager() {
         try {
             dataBase_ = std::make_unique<odb::pgsql::database>(
@@ -47,5 +49,6 @@ private:
         }
     }
 
+    /// Деструктор синглтона
     ~DatabaseManager() = default;
 };

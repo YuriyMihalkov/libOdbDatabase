@@ -10,7 +10,8 @@ public:
     virtual ~Database() = default;
 
     #pragma db id auto
-    unsigned long id = 0;
+
+    unsigned long id = 0; ///< Уникальный идентификатор объекта в базе данных
 
     /// Сохраняет объект в базе данных  
     template <typename T> bool save();

@@ -1,27 +1,37 @@
-# Функция для получения всех файлов в указанной директории
-function(get_entity_files target_dir result_var)
+# Получает список всех файлов в указанной директории и её поддиректориях, 
+# возвращая их в переменную родительской области видимости.
+# Использование: get_entity_files(<TARGET_DIR> <RESULT_PATCHES>)
+# Аргументы:
+#   TARGET_DIR: Путь к целевой директории, в которой нужно искать файлы
+#   RESULT_PATCHES: Имя переменной, в которую будет возвращён список найденных файлов
+function(get_entity_files TARGET_DIR RESULT_PATCHES)
     # Рекурсивный поиск всех файлов в папке
-    file(GLOB_RECURSE found_files "${target_dir}/*")
+    file(GLOB_RECURSE found_files "${TARGET_DIR}/*")
     
     # Возвращаем результат в переменную родительской области видимости
-    set(${result_var} "${found_files}" PARENT_SCOPE)
+    set(${RESULT_PATCHES} "${found_files}" PARENT_SCOPE)
 endfunction()
 
-# Функция поиска директории проекта
-function(find_unique_entities_database_dir result_var)
-    # Ищем строго папки с нужным именем на разной глубине, 
-    # избегая тотального сканирования всего диска и папки build
-    file(GLOB found_dirs 
+# Функция ищет уникальную директорию с именем "entities_database" в проекте.
+# Если не найдено не одной директории или более одной директории, сборка прерывается с ошибкой.
+# Использование: find_unique_entities_database_dir(<RESULT_VAR>)
+# Аргументы:
+#   RESULT_VAR: Имя переменной, в которую будет возвращён путь к найденной директории
+function(find_unique_entities_database_dir RESULT_VAR)
+    # Используем GLOB_RECURSE для бесконечной вложенности.
+    # Шаблон **/entities_database заставит CMake искать эту папку везде внутри CMAKE_SOURCE_DIR.
+    file(GLOB_RECURSE found_dirs 
          LIST_DIRECTORIES true 
          CONFIGURE_DEPENDS
-         "${CMAKE_SOURCE_DIR}/entities_database"        # В самом корне
-         "${CMAKE_SOURCE_DIR}/*/entities_database"      # На 1 уровень глубже (например, src/entities_database)
-         "${CMAKE_SOURCE_DIR}/*/*/entities_database"    # На 2 уровня глубже
+         "${CMAKE_SOURCE_DIR}/**/entities_database"
     )
 
     set(filtered_dirs "")
+    
+    # Заранее приводим путь сборки к абсолютному виду для корректного сравнения
+    get_filename_component(abs_binary_dir "${CMAKE_BINARY_DIR}" ABSOLUTE)
+
     foreach(path IN LISTS found_dirs)
-        get_filename_component(abs_binary_dir "${CMAKE_BINARY_DIR}" ABSOLUTE)
         get_filename_component(abs_path "${path}" ABSOLUTE)
         
         # Получаем имя конкретной папки
@@ -30,12 +40,21 @@ function(find_unique_entities_database_dir result_var)
         # Безопасная проверка нахождения внутри папки сборки
         string(FIND "${abs_path}" "${abs_binary_dir}" is_inside_build)
 
-        # Проверяем условия
+        # Условия:
+        # 1. Директория
+        # 2. Имя совпадает с "entities_database"
+        # 3. НЕ build
+        # 4. Путь НЕ содержит скрытых папок
         if(IS_DIRECTORY "${abs_path}" 
            AND "${dir_name}" STREQUAL "entities_database"
            AND NOT is_inside_build EQUAL 0
            AND NOT abs_path MATCHES "[/\\\\]\\.[^/\\\\]+")
-            list(APPEND filtered_dirs "${abs_path}")
+            
+            # Исключаем дубликаты, которые GLOB_RECURSE может вернуть для одной и той же папки
+            list(FIND filtered_dirs "${abs_path}" _already_added)
+            if(_already_added EQUAL -1)
+                list(APPEND filtered_dirs "${abs_path}")
+            endif()
         endif()
     endforeach()
 
@@ -53,15 +72,22 @@ function(find_unique_entities_database_dir result_var)
         foreach(path IN LISTS filtered_dirs)
             message(STATUS "  - ${path}")
         endforeach()
-        message(FATAL_ERROR "Ошибка сборки: Найдено более одной директории 'entities_database' (${dirs_count}). Должна быть только одна!")
+        message(FATAL_ERROR "Ошибка сборки: Найдено более одной директории 'entities_database' в проекте: 
+            (${dirs_count}). Должна быть только одна такая директория!")
     endif()
 
     # Если всё хорошо, возвращаем единственный путь в родительскую область видимости
     list(GET filtered_dirs 0 unique_dir)
-    set(${result_var} "${unique_dir}" PARENT_SCOPE)
+    set(${RESULT_VAR} "${unique_dir}" PARENT_SCOPE)
 endfunction()
 
-function(get_hpp_files_in_dir dir_path result_var)
+# Функция ищет все файлы с расширением .hpp в указанной директории.
+# Если файлов не найдено, сборка прерывается с ошибкой.
+# Использование: get_hpp_files_in_dir(<DIR_PATH> <RESULT_VAR>)
+# Аргументы:
+#   DIR_PATH: Путь к директории, в которой нужно искать файлы
+#   RESULT_VAR: Имя переменной, в которую будет возвращён список найденных файлов
+function(get_hpp_files_in_dir dir_path RESULT_VAR)
     # Ищем только файлы с расширением .hpp
     # CONFIGURE_DEPENDS автоматически перезапустит CMake при добавлении/удалении файлов
     file(GLOB found_items
@@ -86,9 +112,17 @@ function(get_hpp_files_in_dir dir_path result_var)
     endif()
 
     # Возвращаем список файлов в родительскую область видимости
-    set(${result_var} "${filtered_files}" PARENT_SCOPE)
+    set(${RESULT_VAR} "${filtered_files}" PARENT_SCOPE)
 endfunction()
 
+# Функция для добавления тестового исполняемого файла и регистрации его в CTest.
+# Использование: add_test_exe(<NAME> SOURCES <source_files> LIBS <libraries> DEFS <definitions> LABELS <labels>)
+# Аргументы:
+#   NAME: Имя тестового исполняемого файла
+#   SOURCES: Список исходных файлов для компиляции теста
+#   LIBS: Список библиотек для линковки с тестом
+#   DEFS: Список определений препроцессора для теста
+#   LABELS: Список меток для теста (опционально)
 function(add_test_exe NAME)
     cmake_parse_arguments(T "" "" "SOURCES;LIBS;DEFS;LABELS" ${ARGN})
 
