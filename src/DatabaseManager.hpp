@@ -3,6 +3,7 @@
 #include <odb/database.hxx>
 #include <odb/pgsql/database.hxx> 
 #include <odb/schema-catalog.hxx> 
+#include "../config/config.h"
 
 class DatabaseManager {
 public:
@@ -30,7 +31,7 @@ private:
     DatabaseManager() {
         try {
             dataBase_ = std::make_unique<odb::pgsql::database>(
-                "postgres", "my_secret_password", "my_database", "127.0.0.1", 5432
+                DATABASE_USER, DATABASE_PASSWD, DATABASE_NAME, DATABASE_ADDRESS, DATABASE_PORT
             );
 
             odb::transaction transaction(dataBase_->begin());
