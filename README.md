@@ -56,7 +56,7 @@
 ```bash
 sudo apt-get update
 sudo apt-get install build-essential cmake libpq-dev
-# Установка ODB (если нет в репозиториях, требуется сборка из исходников или ppa)
+sudo apt install postgresql-server-dev-all postgresql
 sudo apt-get install odb libodb-dev libodb-pgsql-dev
 ```
 
@@ -129,11 +129,27 @@ int main() {
 
 ---
 
-## 🔨 Сборка проекта
+## 🔨 Сборка и запуск
 
-Проект собирается стандартным для CMake способом. На этапе генерации скрипт `cmake/Function.cmake` автоматически вызывает компилятор `odb` с флагом `--database pgsql` для генерации файлов связи (`.hxx`, `.cxx`, `.ixx`).
+1. Создание роли для базы данных
 
-```bash
+Для использования сервера вам понадобится пользователь с правами на создание базы данных:
+
+```shell
+sudo -u postgres createuser -d $USER
+```
+
+2. Создание базы данных, с которой будет работать сервер
+
+По умолчанию используется имя `kpiok`, но вы можете дать любое имя и указать его при запуске сервера:
+
+```shell
+createdb my_database
+```
+
+3. Проект собирается стандартным для CMake способом. На этапе генерации скрипт `cmake/Function.cmake` автоматически вызывает компилятор `odb` с флагом `--database pgsql` для генерации файлов связи (`.hxx`, `.cxx`, `.ixx`).
+
+```shell
 # 1. Клонируйте репозиторий
 git clone git@github.com:YuriyMihalkov/libOdbDatabase.git
 cd libOdbDatabase
