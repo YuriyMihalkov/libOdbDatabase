@@ -11,21 +11,21 @@ show_dir_linux:
   script:
     - pwd
   tags:
-    - Debian13Runner # Тег для Linux
+    - Debian13Runner
 
 show_dir_win10:
   stage: show_dir
   script:
     - Get-Location
   tags:
-    - Windows10 # Тег для Windows 10
+    - Windows10
 
 show_dir_win11:
   stage: show_dir
   script:
     - Get-Location
   tags:
-    - Windows11 # Тег для Windows 11
+    - Windows11
 
 # ==========================================
 # СБОРКА 
@@ -50,8 +50,9 @@ build-debian13:
         CMAKE_GENERATOR: "Unix Makefiles"
   before_script:
     - ls -la ./
-    - mkdir build && cd build
+    - mkdir -p build
   script:
+    - cd build
     - cmake ${CMAKE_FLAGS} .. && cmake --build .
   artifacts:
     expire_in: 1 hour
@@ -65,7 +66,6 @@ build-windows10:
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
-  needs: []
   rules:
     - if: $CI_COMMIT_TAG
       variables:
@@ -80,11 +80,11 @@ build-windows10:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    - New-Item -ItemType Directory -Force -Path build  
-    - cd build
+    - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
-    - bash
-    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+    - cd build
+    - cmake $env:CMAKE_FLAGS .. 
+    - cmake --build .
   artifacts:
     expire_in: 1 hour
     paths:
@@ -97,7 +97,6 @@ build-windows11:
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
-  needs: []
   rules:
     - if: $CI_COMMIT_TAG
       variables:
@@ -112,11 +111,11 @@ build-windows11:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    - New-Item -ItemType Directory -Force -Path build
-    - cd build
+    - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
-    - bash
-    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+    - cd build
+    - cmake $env:CMAKE_FLAGS .. 
+    - cmake --build .
   artifacts:
     expire_in: 1 hour
     paths:
@@ -146,8 +145,8 @@ test-windows10:
     - job: build-windows10 
       artifacts: true
   script:
-    - cd build
-    - bash -c "ctest --output-on-failure" 
+    - if (Test-Path build) { cd build }
+    - ctest --output-on-failure
   tags:
     - Windows10
 
@@ -158,7 +157,7 @@ test-windows11:
     - job: build-windows11 
       artifacts: true
   script:
-    - cd build
-    - bash -c "ctest --output-on-failure"
+    - if (Test-Path build) { cd build }
+    - ctest --output-on-failure
   tags:
     - Windows11
