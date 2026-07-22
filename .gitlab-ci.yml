@@ -83,7 +83,7 @@ build-windows10:
     - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
     - cd build
-    - cmake $env:CMAKE_FLAGS .. 
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb" .. 
     - cmake --build .
   artifacts:
     expire_in: 1 hour
@@ -114,7 +114,7 @@ build-windows11:
     - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
     - cd build
-    - cmake $env:CMAKE_FLAGS .. 
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb" .. 
     - cmake --build .
   artifacts:
     expire_in: 1 hour
