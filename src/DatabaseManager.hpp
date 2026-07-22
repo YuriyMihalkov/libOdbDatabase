@@ -40,6 +40,7 @@ private:
             if (odb::schema_catalog::exists(*dataBase_, "")) {
                 odb::schema_catalog::drop_schema(*dataBase_, ""); 
             }
+            
             odb::schema_catalog::create_schema(*dataBase_, "");
             
             transaction.commit();
