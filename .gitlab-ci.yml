@@ -123,7 +123,7 @@ build-windows11:
     - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
     - $env:CPATH = "C:\Dev\orm_odb\include"
     - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" .. 
-    - cmake --build ..
+    - cmake --build .
   artifacts:
     expire_in: 1 hour
     paths:
