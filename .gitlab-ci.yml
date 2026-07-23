@@ -83,7 +83,7 @@ build-windows10:
     - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
     - cd build
-    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/googletest" .. 
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb" "-DGTEST_INCLUDE_DIR=C:/Dev/googletest/googletest/include" "-DGTEST_LIBRARY=C:/Dev/googletest/build/lib/libgtest.a" "-DGTEST_MAIN_LIBRARY=C:/Dev/googletest/build/lib/libgtest_main.a" .. 
     - cmake --build .
   artifacts:
     expire_in: 1 hour
@@ -101,6 +101,7 @@ build-windows11:
     - if: $CI_COMMIT_TAG
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+
         CMAKE_GENERATOR: "MinGW Makefiles"
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       variables:
@@ -114,7 +115,10 @@ build-windows11:
     - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
     - cd build
-    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/googletest" .. 
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb" 
+      "-DGTEST_INCLUDE_DIR=C:/Dev/googletest/googletest/include" 
+      "-DGTEST_LIBRARY=C:/Dev/googletest/build/lib/libgtest.a" 
+      "-DGTEST_MAIN_LIBRARY=C:/Dev/googletest/build/lib/libgtest_main.a" .. 
     - cmake --build .
   artifacts:
     expire_in: 1 hour
