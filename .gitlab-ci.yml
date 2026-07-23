@@ -154,6 +154,7 @@ test-windows10:
       artifacts: true
   script:
     - if (Test-Path build) { cd build }
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
     - ctest --output-on-failure
   tags:
     - Windows10
@@ -166,6 +167,7 @@ test-windows11:
       artifacts: true
   script:
     - if (Test-Path build) { cd build }
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
     - ctest --output-on-failure
   tags:
     - Windows11
