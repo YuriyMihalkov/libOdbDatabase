@@ -83,6 +83,7 @@ build-windows10:
     - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
     - cd build
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
     - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" .. 
     - cmake --build .
   artifacts:
@@ -115,6 +116,7 @@ build-windows11:
     - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
   script:
     - cd build
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
     - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" ..  
     - cmake --build .
   artifacts:
