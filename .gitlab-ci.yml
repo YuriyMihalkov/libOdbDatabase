@@ -80,7 +80,9 @@ build-windows10:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
+    # Жесткая очистка старого билда во избежание GLOB mismatch
+    - if (Test-Path build) { Remove-Item -Recurve -Force build }
+    - New-Item -ItemType Directory -Force -Path build
   script:
     - cd build
     - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
@@ -102,7 +104,6 @@ build-windows11:
     - if: $CI_COMMIT_TAG
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
-
         CMAKE_GENERATOR: "MinGW Makefiles"
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       variables:
@@ -113,7 +114,9 @@ build-windows11:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    - if (!(Test-Path build)) { New-Item -ItemType Directory -Force -Path build }
+    # Жесткая очистка старого билда во избежание GLOB mismatch
+    - if (Test-Path build) { Remove-Item -Recurve -Force build }
+    - New-Item -ItemType Directory -Force -Path build
   script:
     - cd build
     - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
