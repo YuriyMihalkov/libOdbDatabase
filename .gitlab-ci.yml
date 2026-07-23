@@ -86,7 +86,7 @@ build-windows10:
   script:
     - cd build
     - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
-    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" "-DCMAKE_CXX_FLAGS=-IC:/Dev/orm_odb/include" .. 
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" "-DODB_INCLUDE_DIRS=C:/Dev/orm_odb/include" "-DODB_INCLUDE_DIR=C:/Dev/orm_odb/include" .. 
     - cmake --build .
   artifacts:
     expire_in: 1 hour
@@ -120,7 +120,7 @@ build-windows11:
   script:
     - cd build
     - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
-    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" "-DCMAKE_CXX_FLAGS=-IC:/Dev/orm_odb/include" .. 
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" "-DODB_INCLUDE_DIRS=C:/Dev/orm_odb/include" "-DODB_INCLUDE_DIR=C:/Dev/orm_odb/include" .. 
     - cmake --build .
   artifacts:
     expire_in: 1 hour
