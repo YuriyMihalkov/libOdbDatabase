@@ -135,9 +135,28 @@ int main() {
 
 Для использования сервера вам понадобится пользователь с правами на создание базы данных:
 
+<ul>
+<li>
+<details>
+<summary>🐧 <b>Linux</b></summary>
+
 ```shell
-sudo -u postgres createuser -d $USER
+sudo -u postgres createuser -d \$USER
 ```
+
+</details>
+</li>
+<li>
+<details>
+<summary>🪟 <b>Windows</b></summary>
+
+```cmd
+createuser -U postgres -d %USERNAME%
+```
+
+</details>
+</li>
+</ul>
 
 2. Создание базы данных, с которой будет работать сервер
 
@@ -148,6 +167,11 @@ createdb my_database
 ```
 
 3. Проект собирается стандартным для CMake способом. На этапе генерации скрипт `cmake/Function.cmake` автоматически вызывает компилятор `odb` с флагом `--database pgsql` для генерации файлов связи (`.hxx`, `.cxx`, `.ixx`).
+
+<ul>
+<li>
+<details>
+<summary>🐧 <b>Linux</b></summary>
 
 ```shell
 # 1. Клонируйте репозиторий
@@ -164,6 +188,41 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
+</details>
+</li>
+<li>
+<details>
+<summary>🪟 <b>Windows</b></summary>
+
+```cmd
+# 1. Перейдите в папку сборки
+cd build
+
+# 2. Добавьте пути к DLL компилятора и ORM в переменную окружения PATH (чтобы тесты/программы запускались)
+$env:PATH = "<Путь к компиляторуMinGW>\bin;<Путь к папке с ORM ODB>\bin;" + $env:PATH
+
+# 3. Укажите пути к заголовочным файлам для компилятора MinGW
+$env:CPATH = "<Путь к папке с ORM ODB>\include"
+
+# 4. Сконфигурируйте проект с указанием путей поиска для CMake (разделитель путей внутри переменной — точка с запятой, взятая в кавычки)
+cmake -DCMAKE_PREFIX_PATH="<Путь к папке с ORM ODB>;<Путь к gtest>" -DCMAKE_BUILD_TYPE=Release ..
+
+# 5. Скомпилируйте проект
+cmake --build .
+```
+
+**Пример:**
+```cmd
+cd build
+$env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
+$env:CPATH = "C:\Dev\orm_odb\include"
+cmake -DCMAKE_PREFIX_PATH="C:/Dev/orm_odb;C:/Dev/gtest" -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+```
+</details>
+</li>
+</ul>
+
 ---
 
 ## 🧪 Запуск тестов
@@ -174,5 +233,4 @@ cmake --build .
 cd build
 ctest --output-on-failure
 ```
-
 ---
