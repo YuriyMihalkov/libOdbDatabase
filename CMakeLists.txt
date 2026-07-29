@@ -11,6 +11,23 @@ foreach(FILE_PATH ${CMAKE_FILES})
 endforeach()
 
 find_package(ODB REQUIRED COMPONENTS pgsql)
+
+# Создаем интерфейсный таргет-обертку, если его нет
+if(NOT TARGET ODB::odb)
+    add_library(ODB::odb INTERFACE IMPORTED)
+    set_target_properties(ODB::odb PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${ODB_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${ODB_LIBRARIES}"
+    )
+endif()
+
+if(NOT TARGET ODB::pgsql)
+    add_library(ODB::pgsql INTERFACE IMPORTED)
+    set_target_properties(ODB::pgsql PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${ODB_PGSQL_LIBRARIES};ODB::odb"
+    )
+endif()
+
 find_unique_entities_database_dir(ENTIRES_PATH)
 
 # Список всех компилируемых файлов
@@ -75,7 +92,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     "${ENTIRES_PATH}"
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${ODB_LIBRARIES} ${ODB_PGSQL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ODB::odb ODB::pgsql)
 
 # =====================================================================
 # 4. Тесты
