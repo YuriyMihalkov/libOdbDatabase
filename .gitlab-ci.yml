@@ -13,6 +13,14 @@ show_dir_linux:
   tags:
     - Debian13Runner
 
+show_dir_arch_docker:
+  stage: show_dir
+  image: ubuntu2204_forprojectcontrol-cpp-dev
+  script:
+    - pwd
+  tags:
+    - docker-build
+
 show_dir_win10:
   stage: show_dir
   script:
@@ -59,7 +67,39 @@ build-debian13:
     paths:
       - build/
   tags:
-    - Debian13Runner 
+    - Debian13Runner
+
+build-arch-docker:
+  stage: build
+  image: ubuntu2204_forprojectcontrol-cpp-dev
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+        CMAKE_GENERATOR: "Ninja"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_GENERATOR: "Ninja"
+  before_script:
+    - ls -la ./
+    - mkdir -p build
+  script:
+    - cd build
+    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - docker-build
       
 build-windows10:
   stage: build
@@ -80,7 +120,6 @@ build-windows10:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    # Жесткая очистка старого билда во избежание GLOB mismatch
     - if (Test-Path build) { Remove-Item -Recurve -Force build }
     - New-Item -ItemType Directory -Force -Path build
   script:
@@ -115,7 +154,6 @@ build-windows11:
         CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
-    # Жесткая очистка старого билда во избежание GLOB mismatch
     - if (Test-Path build) { Remove-Item -Recurve -Force build }
     - New-Item -ItemType Directory -Force -Path build
   script:
@@ -146,6 +184,19 @@ test-debian13:
   tags:
     - Debian13Runner
 
+test-arch-docker:
+  stage: test
+  image: ubuntu2204_forprojectcontrol-cpp-dev
+  interruptible: true
+  needs:
+    - job: build-arch-docker
+      artifacts: true
+  script:
+    - cd build
+    - ctest --output-on-failure
+  tags:
+    - docker-build
+
 test-windows10:
   stage: test
   interruptible: true
@@ -171,4 +222,3 @@ test-windows11:
     - ctest --output-on-failure
   tags:
     - Windows11
-    
