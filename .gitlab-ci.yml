@@ -18,8 +18,8 @@ show_dir_arch_docker:
   image: ubuntu2204_forprojectcontrol-cpp-dev
   script:
     - pwd
-  # tags:
-  #   - docker-build
+  tags:
+    - Ubuntu.24
 
 show_dir_win10:
   stage: show_dir
@@ -99,7 +99,7 @@ build-arch-docker:
     paths:
       - build/
   tags:
-    - docker-build
+    - Ubuntu.24
       
 build-windows10:
   stage: build
@@ -222,3 +222,4 @@ test-windows11:
     - ctest --output-on-failure
   tags:
     - Windows11
+    
