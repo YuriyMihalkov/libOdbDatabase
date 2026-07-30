@@ -18,8 +18,8 @@ show_dir_arch_docker:
   image: ubuntu2204_forprojectcontrol-cpp-dev
   script:
     - pwd
-  tags:
-    - docker-build
+  # tags:
+  #   - docker-build
 
 show_dir_win10:
   stage: show_dir
