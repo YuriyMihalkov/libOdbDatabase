@@ -20,36 +20,44 @@ endfunction()
 function(find_unique_entities_database_dir RESULT_VAR)
     # Используем GLOB_RECURSE для бесконечной вложенности.
     # Шаблон **/entities_database заставит CMake искать эту папку везде внутри CMAKE_SOURCE_DIR.
-    file(GLOB_RECURSE found_dirs 
-         LIST_DIRECTORIES true 
+    file(GLOB_RECURSE found_dirs
+         LIST_DIRECTORIES true
          CONFIGURE_DEPENDS
          "${CMAKE_SOURCE_DIR}/**/entities_database"
     )
 
     set(filtered_dirs "")
-    
+
     # Заранее приводим путь сборки к абсолютному виду для корректного сравнения
     get_filename_component(abs_binary_dir "${CMAKE_BINARY_DIR}" ABSOLUTE)
 
     foreach(path IN LISTS found_dirs)
         get_filename_component(abs_path "${path}" ABSOLUTE)
-        
+
         # Получаем имя конкретной папки
         get_filename_component(dir_name "${abs_path}" NAME)
 
         # Безопасная проверка нахождения внутри папки сборки
         string(FIND "${abs_path}" "${abs_binary_dir}" is_inside_build)
 
+        # Проверка: находится ли папка внутри директории тестов
+        set(is_inside_tests FALSE)
+        if(abs_path MATCHES "[/\\\\]tests[/\\\\]" OR abs_path MATCHES "[/\\\\]tests$")
+            set(is_inside_tests TRUE)
+        endif()
+
         # Условия:
         # 1. Директория
         # 2. Имя совпадает с "entities_database"
         # 3. НЕ build
         # 4. Путь НЕ содержит скрытых папок
-        if(IS_DIRECTORY "${abs_path}" 
+        # 5. Исключаем тесты, ЕСЛИ ODB_DATABASE_DISABLE_TEST установлен в TRUE
+        if(IS_DIRECTORY "${abs_path}"
            AND "${dir_name}" STREQUAL "entities_database"
            AND NOT is_inside_build EQUAL 0
-           AND NOT abs_path MATCHES "[/\\\\]\\.[^/\\\\]+")
-            
+           AND NOT abs_path MATCHES "[/\\\\]\\.[^/\\\\]+"
+           AND NOT (ODB_DATABASE_DISABLE_TEST AND is_inside_tests))
+
             # Исключаем дубликаты, которые GLOB_RECURSE может вернуть для одной и той же папки
             list(FIND filtered_dirs "${abs_path}" _already_added)
             if(_already_added EQUAL -1)
@@ -68,12 +76,17 @@ function(find_unique_entities_database_dir RESULT_VAR)
 
     # Проверка 2: Найдено больше одной папки
     if(dirs_count GREATER 1)
-        message(STATUS "Найденные папки entities_database:")
+        # Формируем красивый многострочный список путей для вывода в FATAL_ERROR
+        set(dirs_list_string "")
         foreach(path IN LISTS filtered_dirs)
-            message(STATUS "  - ${path}")
+            string(APPEND dirs_list_string "\n  -> ${path}")
         endforeach()
-        message(FATAL_ERROR "Ошибка сборки: Найдено более одной директории 'entities_database' в проекте: 
-            (${dirs_count}). Должна быть только одна такая директория!")
+
+        message(FATAL_ERROR
+            "Ошибка сборки: Найдено более одной директории 'entities_database' в проекте (${dirs_count}).\n"
+            "Должна быть только одна такая директория!\n"
+            "Список найденных путей:${dirs_list_string}\n"
+        )
     endif()
 
     # Если всё хорошо, возвращаем единственный путь в родительскую область видимости

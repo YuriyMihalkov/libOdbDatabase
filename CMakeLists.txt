@@ -28,6 +28,10 @@ if(NOT TARGET ODB::pgsql)
     )
 endif()
 
+if(NOT DEFINED ODB_DATABASE_DISABLE_TEST)
+    option(ODB_DATABASE_DISABLE_TEST "Disable tests" FALSE)
+endif()
+
 find_unique_entities_database_dir(ENTIRES_PATH)
 
 # Список всех компилируемых файлов
@@ -97,7 +101,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ODB::odb ODB::pgsql)
 # =====================================================================
 # 4. Тесты
 # =====================================================================
-option(ODB_DATABASE_DISABLE_TEST "Disable tests" FALSE)
 if(NOT ODB_DATABASE_DISABLE_TEST)
     find_package(GTest CONFIG REQUIRED)
     include(CTest)
