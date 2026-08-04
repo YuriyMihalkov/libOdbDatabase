@@ -195,7 +195,7 @@ test-arch-docker:
     - cd build
     - ctest --output-on-failure
   tags:
-    - docker-build
+    - Ubuntu.24
 
 test-windows10:
   stage: test
