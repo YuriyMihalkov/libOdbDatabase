@@ -32,7 +32,7 @@ if(NOT DEFINED ODB_DATABASE_DISABLE_TEST)
     option(ODB_DATABASE_DISABLE_TEST "Disable tests" FALSE)
 endif()
 
-find_unique_entities_database_dir(ENTIRES_PATH)
+find_unique_entities_database_dir(ENTIRES_PATHS)
 
 # Список всех компилируемых файлов
 set(ALL_ODB_SOURCES 
@@ -59,12 +59,12 @@ add_custom_command(
 # =====================================================================
 # 2. Динамическая генерация для сущностей из entities_database
 # =====================================================================
-file(GLOB ENTIRES_PATHS
+file(GLOB HANDLER_ENTIRES_PATHS
      CONFIGURE_DEPENDS
-     "${ENTIRES_PATH}/*.hpp"
+     "${ENTIRES_PATHS}/*.hpp"
 )
 
-foreach(header IN LISTS ENTIRES_PATHS)
+foreach(header IN LISTS HANDLER_ENTIRES_PATHS)
     get_filename_component(name_we "${header}" NAME_WLE)
     list(APPEND ALL_ODB_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/${name_we}-odb.cxx")
     
@@ -77,9 +77,9 @@ foreach(header IN LISTS ENTIRES_PATHS)
                 --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
                 -I "${CMAKE_CURRENT_SOURCE_DIR}/include" 
                 -I "${CMAKE_CURRENT_SOURCE_DIR}" 
-                -I "${ENTIRES_PATH}"
-                "${ENTIRES_PATH}/${name_we}.hpp"
-        DEPENDS "${ENTIRES_PATH}/${name_we}.hpp" "${CMAKE_CURRENT_BINARY_DIR}/Database-odb.hxx"
+                -I "${ENTIRES_PATHS}"
+                "${ENTIRES_PATHS}/${name_we}.hpp"
+        DEPENDS "${ENTIRES_PATHS}/${name_we}.hpp" "${CMAKE_CURRENT_BINARY_DIR}/Database-odb.hxx"
         VERBATIM
     )
 endforeach()
@@ -93,7 +93,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    "${ENTIRES_PATH}"
+    "${ENTIRES_PATHS}"
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ODB::odb ODB::pgsql)

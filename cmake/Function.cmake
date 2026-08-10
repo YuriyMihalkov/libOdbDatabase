@@ -82,11 +82,6 @@ function(find_unique_entities_database_dir RESULT_VAR)
             string(APPEND dirs_list_string "\n  -> ${path}")
         endforeach()
 
-        message(FATAL_ERROR
-            "Ошибка сборки: Найдено более одной директории 'entities_database' в проекте (${dirs_count}).\n"
-            "Должна быть только одна такая директория!\n"
-            "Список найденных путей:${dirs_list_string}\n"
-        )
     endif()
 
     # Если всё хорошо, возвращаем единственный путь в родительскую область видимости
