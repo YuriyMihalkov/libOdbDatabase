@@ -93,17 +93,62 @@ TEST_F(DatabaseTest, RemoveDataBase) {
     EXPECT_EQ(Database::getAll<User>().begin()->get()->name, "Юрий");
 }
 
-// 7. Тест очистки всех данных таблицы
+/// 7. Тест поиска данных в таблице
+TEST_F(DatabaseTest, FindInDatabase) {
+    // Подготовка тестовых данных: добавляем двух пользователей с одинаковым именем
+    auto user1 = std::make_shared<User>();
+    user1->name = "Alice";
+    user1->age = 25;
+    user1->update<User>();
+
+    auto user2 = std::make_shared<User>();
+    user2->name = "Alice";
+    user2->age =30;
+
+    auto user3 = std::make_shared<User>();
+    user3->name = "Bob";
+    user3->age = 40;
+
+    // --- Сценарий 1: Поиск по полю, где есть несколько совпадений ---
+    {
+        auto result = Database::find<User>("name", std::string("Alice"));
+        
+        ASSERT_TRUE(result.has_value());             // Проверяем, что вернулся не nullopt
+        EXPECT_EQ(result->size(), 2);                // Должно найтись ровно 2 записи
+        
+        // Проверяем, что данные внутри вектора корректны
+        EXPECT_EQ((*result)[0].name, "Alice");
+        EXPECT_EQ((*result)[1].name, "Alice");
+    }
+
+    // --- Сценарий 2: Поиск по уникальному значению (одно совпадение) ---
+    {
+        auto result = Database::find<User>("age", 40);
+        
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result->size(), 1);                // Должна найтись 1 запись
+        EXPECT_EQ((*result)[0].name, "Bob");
+    }
+
+    // --- Сценарий 3: Поиск несуществующих данных ---
+    {
+        auto result = Database::find<User>("name", std::string("Charlie"));
+        
+        EXPECT_FALSE(result.has_value());            // Должен вернуться std::nullopt
+    }
+}
+
+// 8. Тест очистки всех данных таблицы
 TEST_F(DatabaseTest, ClearTableDataBase) {
-    std::shared_ptr<User> user = std::make_shared<User>("Дмитрий", "dima@mail.com");
+    User user = User("Дмитрий", "dima@mail.com");
 
     // Сохраняем еще одну запись
-    EXPECT_TRUE(user->save<User>()); 
+    EXPECT_TRUE(user.save<User>()); 
 
-    std::shared_ptr<User> user1 = std::make_shared<User>("Петр", "Petr@mail.com");
+    User user1 = User("Петр", "Petr@mail.com");
 
     // Сохраняем еще одну запись
-    EXPECT_TRUE(user1->save<User>()); 
+    EXPECT_TRUE(user1.save<User>()); 
 
     // Проверяем, что записей теперь две
     EXPECT_EQ(Database::getAll<User>().size(), 3);
@@ -114,3 +159,4 @@ TEST_F(DatabaseTest, ClearTableDataBase) {
     // Проверяем что не осталось не одной записи в таблице
     EXPECT_EQ(Database::getAll<User>().size(), 0);
 }
+

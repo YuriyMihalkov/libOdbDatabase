@@ -130,23 +130,35 @@ std::vector<std::shared_ptr<T>> Database::getAll() {
     return result;
 }
 
-template <typename T>
-std::optional<std::shared_ptr<T>> Database::find(const std::string& fieldName, const std::any& value) {
+template <typename T, typename ValueType>
+std::optional<std::vector<T>> Database::find(const std::string& fieldName, const ValueType& value) {
     std::lock_guard<std::mutex> lock(dbMutex);
     try {
         odb::database& database = DatabaseManager::instance().getDatabase();
         odb::transaction transaction(database.begin());
-        auto query = database.query<T>();
-        query.set("field", value);
-        for (auto& obj : query) {
-            std::shared_ptr<T> result(std::make_shared<T>(obj));
-            return result;
+
+        // Формируем SQL-запрос. 
+        odb::query<T> nativeQuery = "WHERE \"" + fieldName + "\" =" + odb::query<T>::_val(value);
+
+        // Выполняем запрос к базе данных
+        auto result_set = database.query<T>(nativeQuery);
+        
+        // Собираем все результаты в вектор
+        std::vector<T> results;
+        for (auto& obj : result_set) {
+            results.push_back(obj);
         }
 
         transaction.commit();
+
+        if (results.empty()) {
+            return std::nullopt;
+        }
+
+        return results;
+
     } catch (const odb::exception& error) {
-        std::cerr << error.what() << std::endl;
-        return {}; // Другие ошибки БД (например, проблемы с соединением)
+        std::cerr << "ODB Error in find: " << error.what() << std::endl;
+        return std::nullopt;
     }
-    return {};
 }

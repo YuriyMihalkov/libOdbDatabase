@@ -37,7 +37,7 @@ public:
     template <typename T> static std::vector<std::shared_ptr<T>> getAll();
 
     /// Ищет объект типа T по идентификатору поля и значению поля
-    template <typename T> static std::optional<std::shared_ptr<T>> find(const std::string& fieldName, const std::any& value);
+    template <typename T, typename ValueType> static std::optional<std::vector<T>> find(const std::string& fieldName, const ValueType& value);
 
     /// Удаляет все таблицы из базы данных
     static void dropAllTable();
