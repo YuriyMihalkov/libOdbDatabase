@@ -150,13 +150,11 @@ std::optional<std::vector<T>> Database::find(const std::string& fieldName, const
         }
 
         transaction.commit();
-
         if (results.empty()) {
             return std::nullopt;
         }
 
         return results;
-
     } catch (const odb::exception& error) {
         std::cerr << "ODB Error in find: " << error.what() << std::endl;
         return std::nullopt;
