@@ -1,7 +1,9 @@
 #pragma once
+#include <any>
 #include <mutex>
 #include <odb/core.hxx>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #pragma db object polymorphic
@@ -33,6 +35,9 @@ public:
 
     /// Получает все объекты типа T из базы данных
     template <typename T> static std::vector<std::shared_ptr<T>> getAll();
+
+    /// Ищет объект типа T по идентификатору поля и значению поля
+    template <typename T> static std::optional<std::shared_ptr<T>> find(const std::string& fieldName, const std::any& value);
 
     /// Удаляет все таблицы из базы данных
     static void dropAllTable();

@@ -1,8 +1,10 @@
 #pragma once
 #include "Database.hpp"
 #include "DatabaseManager.hpp"
+#include <any>
 #include <odb/database.hxx>
 #include <odb/transaction.hxx>
+#include <optional>
 
 template <typename T>
 bool Database::save() { 
@@ -128,3 +130,23 @@ std::vector<std::shared_ptr<T>> Database::getAll() {
     return result;
 }
 
+template <typename T>
+std::optional<std::shared_ptr<T>> Database::find(const std::string& fieldName, const std::any& value) {
+    std::lock_guard<std::mutex> lock(dbMutex);
+    try {
+        odb::database& database = DatabaseManager::instance().getDatabase();
+        odb::transaction transaction(database.begin());
+        auto query = database.query<T>();
+        query.set("field", value);
+        for (auto& obj : query) {
+            std::shared_ptr<T> result(std::make_shared<T>(obj));
+            return result;
+        }
+
+        transaction.commit();
+    } catch (const odb::exception& error) {
+        std::cerr << error.what() << std::endl;
+        return {}; // Другие ошибки БД (например, проблемы с соединением)
+    }
+    return {};
+}
