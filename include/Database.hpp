@@ -1,5 +1,4 @@
 #pragma once
-#include <any>
 #include <mutex>
 #include <odb/core.hxx>
 #include <memory>
@@ -15,37 +14,55 @@ public:
 
     unsigned long id = 0; ///< Уникальный идентификатор объекта в базе данных
 
-    /// Сохраняет объект в базе данных  
+    /// Сохраняет объект в базе данных
+    /// @return true, если объект сохранен, false, если объект не сохранен
     template <typename T> bool save();
 
     /// Актуализирует значения объекта, загружая его из базы данных
+    /// @return true, если объект актуализирован, false, если объект не актуализирован
     template <typename T> bool actual();
 
     /// Обновляет объект в базе данных
+    /// @return true, если объект обновлен, false, если объект не обновлен 
     template <typename T> bool update();
 
     /// Удаляет объект из базы данных
+    /// @return true, если объект обновлен, false, если объект не обновлен 
     template <typename T> bool remove();
     
     /// Очищает все объекты типа T из базы данных
     template <typename T> static bool clear();
 
+    /// Удаляет объект из базы данных
+    /// @param id идентификатор объекта в базе данных
+    /// @return true, если объект удален, false, если объект не найден
+    template <typename T> static bool remove(const unsigned long id);
+
     /// Получает объект типа T по его идентификатору
+    /// @param id идентификатор объекта в базе данных
+    /// @return объект типа T или пустой объект, если объект не найден
     template <typename T> static std::shared_ptr<T> get(const unsigned long id);
 
     /// Получает все объекты типа T из базы данных
+    /// @return вектор объектов
     template <typename T> static std::vector<std::shared_ptr<T>> getAll();
 
     /// Ищет объект типа T по идентификатору поля и значению поля
+    /// @param fieldName имя поля
+    /// @param value значение поля
+    /// @return объект типа T или пустой объект, если объект не найден
     template <typename T, typename ValueType> static std::optional<std::vector<T>> find(const std::string& fieldName, const ValueType& value);
 
     /// Удаляет все таблицы из базы данных
     static void dropAllTable();
 
     /// Получает список таблиц в базе данных по имени схемы
+    /// @param schemaName имя схемы
+    /// @return список таблиц
     static std::vector<std::string> getTablesBySchema(const std::string& schemaName);
 
     /// Удаляет таблицу из базы данных по имени
+    /// @param tableName имя таблицы
     static void dropTable(const std::string& tableName);
 
 private:
