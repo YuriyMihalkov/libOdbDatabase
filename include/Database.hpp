@@ -16,19 +16,26 @@ public:
 
     /// Сохраняет объект в базе данных
     /// @return true, если объект сохранен, false, если объект не сохранен
-    template <typename T> bool save();
+    bool save();
 
     /// Актуализирует значения объекта, загружая его из базы данных
     /// @return true, если объект актуализирован, false, если объект не актуализирован
-    template <typename T> bool actual();
+    bool actual();
 
     /// Обновляет объект в базе данных
     /// @return true, если объект обновлен, false, если объект не обновлен 
-    template <typename T> bool update();
+    bool update();
 
     /// Удаляет объект из базы данных
     /// @return true, если объект обновлен, false, если объект не обновлен 
-    template <typename T> bool remove();
+    bool remove();
+
+    /// Ищет объект типа T по идентификатору поля и значению поля
+    /// @param fieldName имя поля
+    /// @param value значение поля
+    /// @return объект типа T или пустой объект, если объект не найден
+    template <typename T, typename ValueType> 
+    static std::optional<std::vector<T>> find(const std::string& fieldName, const ValueType& value);
     
     /// Очищает все объекты типа T из базы данных
     template <typename T> static bool clear();
@@ -47,12 +54,6 @@ public:
     /// @return вектор объектов
     template <typename T> static std::vector<std::shared_ptr<T>> getAll();
 
-    /// Ищет объект типа T по идентификатору поля и значению поля
-    /// @param fieldName имя поля
-    /// @param value значение поля
-    /// @return объект типа T или пустой объект, если объект не найден
-    template <typename T, typename ValueType> static std::optional<std::vector<T>> find(const std::string& fieldName, const ValueType& value);
-
     /// Удаляет все таблицы из базы данных
     static void dropAllTable();
 
@@ -67,6 +68,23 @@ public:
 
 private:
     static std::mutex dbMutex; ///< Мьютекс для синхронизации доступа к операциям БД.
+
+    /// Сохраняет объект в базе данных
+    /// @return true, если объект сохранен, false, если объект не сохранен
+    template <typename T> bool save_impl();
+
+    /// Актуализирует значения объекта, загружая его из базы данных
+    /// @return true, если объект актуализирован, false, если объект не актуализирован
+    template <typename T> bool actual_impl();
+
+    /// Обновляет объект в базе данных
+    /// @return true, если объект обновлен, false, если объект не обновлен 
+    template <typename T> bool update_impl();
+
+    /// Удаляет объект из базы данных
+    /// @return true, если объект обновлен, false, если объект не обновлен 
+    template <typename T> bool remove_impl();
+ 
 };
 
 #pragma db view query("SELECT table_name FROM information_schema.tables")

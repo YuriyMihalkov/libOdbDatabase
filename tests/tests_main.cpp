@@ -20,7 +20,7 @@ TEST_F(DatabaseTest, CreateDatabase) {
     User user("Дмитрий", "dima@mail.com");
 
     // Сохраняем указатель на тип в базе данных, проверяем возвращаемый результат
-    EXPECT_TRUE(user.save<User>()); 
+    EXPECT_TRUE(user.save()); 
 }
 
 // 2. Тест успешной загрузки объекта
@@ -42,7 +42,7 @@ TEST_F(DatabaseTest, UpdateDataBase) {
     user->email = "dima123@mail.com";
 
     // Обновляем данные в базе
-    user->update<User>();
+    user->update();
 
     // Сбрасываем значение указателя
     user.reset();
@@ -66,7 +66,7 @@ TEST_F(DatabaseTest, ActualDataBase) {
     user->email = "dima321@mail.com";
     EXPECT_EQ(user->email, "dima321@mail.com");
 
-    user->actual<User>();
+    user->actual();
     EXPECT_EQ(user->email, "dima123@mail.com");
 }
 
@@ -75,14 +75,14 @@ TEST_F(DatabaseTest, RemoveDataBase) {
     std::shared_ptr<User> user = std::make_shared<User>("Юрий", "yuriy@mail.com");
 
     // Сохраняем еще одну запись
-    EXPECT_TRUE(user->save<User>()); 
+    EXPECT_TRUE(user->save()); 
 
     // Проверяем, что записей теперь две
     EXPECT_EQ(Database::getAll<User>().size(), 2);
 
     for (std::shared_ptr<User> user: Database::getAll<User>()) {
         if(user->name == "Дмитрий") {
-            user->remove<User>();
+            user->remove();
         }
     }
 
@@ -99,7 +99,7 @@ TEST_F(DatabaseTest, FindInDatabase) {
     auto user1 = std::make_shared<User>();
     user1->name = "Alice";
     user1->age = 25;
-    user1->update<User>();
+    user1->update();
 
     auto user2 = std::make_shared<User>();
     user2->name = "Alice";
@@ -143,12 +143,12 @@ TEST_F(DatabaseTest, ClearTableDataBase) {
     User user = User("Дмитрий", "dima@mail.com");
 
     // Сохраняем еще одну запись
-    EXPECT_TRUE(user.save<User>()); 
+    EXPECT_TRUE(user.save()); 
 
     User user1 = User("Петр", "Petr@mail.com");
 
     // Сохраняем еще одну запись
-    EXPECT_TRUE(user1.save<User>()); 
+    EXPECT_TRUE(user1.save()); 
 
     // Проверяем, что записей теперь две
     EXPECT_EQ(Database::getAll<User>().size(), 3);

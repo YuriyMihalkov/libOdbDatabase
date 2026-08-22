@@ -74,13 +74,12 @@ sudo apt-get install odb libodb-dev libodb-pgsql-dev
 #include <string>
 
 #pragma db object table("users")
-class User : public Database {
+class Users : public Database {
 public:
     User() = default;
     User(std::string name, std::string email) 
         : name(std::move(name)), email(std::move(email)) {}
 
-    #pragma db type("VARCHAR(100)")
     std::string name;
 
     #pragma db type("VARCHAR(255)") unique
@@ -96,8 +95,8 @@ public:
 
 int main() {
     // 1. Создание и сохранение объекта в PostgreSQL
-    auto user = std::make_shared<User>("Иван", "ivan@example.com");
-    if (user->save<User>()) {
+    Users user = User("Иван", "ivan@example.com");
+    if (user.save()) {
         std::cout << "Пользователь сохранен в PG с ID: " << user->id << std::endl;
     }
 
@@ -111,7 +110,7 @@ int main() {
 
     // 3. Обновление данных
     user->name = "Иван Измененный";
-    user->update<User>();
+    user->update();
 
     // 4. Удаление объекта
     user->remove<User>();
