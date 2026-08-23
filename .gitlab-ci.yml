@@ -2,7 +2,7 @@ stages:
   - show_dir
   - build
   - test
-  - distr
+  # - distr
 
 # ==========================================
 # ИНФОРМАЦИЯ О ДИРЕКТОРИЯХ
@@ -226,72 +226,72 @@ test-windows11:
 # ДИСТРИБУЦИЯ
 # ==========================================
 
-distr-debian13:
-  stage: distr
-  interruptible: true
-  needs:
-    - job: build-debian13
-      artifacts: true
-  script:
-    - cd build
-    - cpack -G DEB
-  artifacts:
-    expire_in: 1 hour
-    paths:
-      - build/
-  tags:
-    - Debian13Runner
+# distr-debian13:
+#   stage: distr
+#   interruptible: true
+#   needs:
+#     - job: build-debian13
+#       artifacts: true
+#   script:
+#     - cd build
+#     - cpack -G DEB
+#   artifacts:
+#     expire_in: 1 hour
+#     paths:
+#       - build/
+#   tags:
+#     - Debian13Runner
 
-distr-arch-docker:
-  stage: distr
-  image: ubuntu2204_forprojectcontrol-cpp-dev
-  interruptible: true
-  needs:
-    - job: build-arch-docker
-      artifacts: true
-  script:
-    - cd build
-    - cpack -G DEB
-  artifacts:
-    expire_in: 1 hour
-    paths:
-      - build/
-  tags:
-    - Ubuntu.24
+# distr-arch-docker:
+#   stage: distr
+#   image: ubuntu2204_forprojectcontrol-cpp-dev
+#   interruptible: true
+#   needs:
+#     - job: build-arch-docker
+#       artifacts: true
+#   script:
+#     - cd build
+#     - cpack -G DEB
+#   artifacts:
+#     expire_in: 1 hour
+#     paths:
+#       - build/
+#   tags:
+#     - Ubuntu.24
 
-distr-windows10:
-  stage: distr
-  interruptible: true
-  needs:
-    - job: build-windows10
-      artifacts: true
-  script:
-    - if (Test-Path build) { cd build }
-    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
-    - cpack -G DEB
-  artifacts:
-    expire_in: 1 hour
-    paths:
-      - build/
-  tags:
-    - Windows10
+# distr-windows10:
+#   stage: distr
+#   interruptible: true
+#   needs:
+#     - job: build-windows10
+#       artifacts: true
+#   script:
+#     - if (Test-Path build) { cd build }
+#     - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
+#     - cpack -G DEB
+#   artifacts:
+#     expire_in: 1 hour
+#     paths:
+#       - build/
+#   tags:
+#     - Windows10
 
-distr-windows11:
-  stage: distr
-  interruptible: true
-  needs:
-    - job: build-windows11
-      artifacts: true
-  script:
-    - if (Test-Path build) { cd build }
-    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
-    - cpack -G DEB
-  artifacts:
-    expire_in: 1 hour
-    paths:
-      - build/
-  tags:
-    - Windows11
+# distr-windows11:
+#   stage: distr
+#   interruptible: true
+#   needs:
+#     - job: build-windows11
+#       artifacts: true
+#   script:
+#     - if (Test-Path build) { cd build }
+#     - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
+#     - cpack -G DEB
+#   artifacts:
+#     expire_in: 1 hour
+#     paths:
+#       - build/
+#   tags:
+#     - Windows11
 
 
   
