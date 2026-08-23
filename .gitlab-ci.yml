@@ -107,18 +107,17 @@ build-windows10:
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
+    CMAKE_GENERATOR: "MinGW Makefiles" # Вынесли сюда, теперь работает для всех правил
   rules:
     - if: $CI_COMMIT_TAG
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
-        CMAKE_GENERATOR: "MinGW Makefiles"
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
-        CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
     - if (Test-Path build) { Remove-Item -Recurve -Force build }
@@ -141,18 +140,17 @@ build-windows11:
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
+    CMAKE_GENERATOR: "MinGW Makefiles" # Вынесли сюда, теперь работает для всех правил
   rules:
     - if: $CI_COMMIT_TAG
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
-        CMAKE_GENERATOR: "MinGW Makefiles"
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
-        CMAKE_GENERATOR: "MinGW Makefiles"
   before_script:
     - Get-ChildItem ./                 
     - if (Test-Path build) { Remove-Item -Recurve -Force build }
