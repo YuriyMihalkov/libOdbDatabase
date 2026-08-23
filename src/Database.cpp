@@ -26,8 +26,6 @@ bool Database::remove() {
     return remove_impl<std::remove_reference_t<decltype(*this)>>();
 }
 
-
-
 void Database::dropAllTable() {
     try {
         std::vector<std::string> tables = Database::getTablesBySchema("");

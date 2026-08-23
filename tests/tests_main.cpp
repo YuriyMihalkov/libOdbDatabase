@@ -99,15 +99,17 @@ TEST_F(DatabaseTest, FindInDatabase) {
     auto user1 = std::make_shared<User>();
     user1->name = "Alice";
     user1->age = 25;
-    user1->update();
+    user1->save();
 
     auto user2 = std::make_shared<User>();
     user2->name = "Alice";
     user2->age =30;
+    user2->save();
 
     auto user3 = std::make_shared<User>();
     user3->name = "Bob";
     user3->age = 40;
+    user3->save();
 
     // --- Сценарий 1: Поиск по полю, где есть несколько совпадений ---
     {
@@ -136,6 +138,8 @@ TEST_F(DatabaseTest, FindInDatabase) {
         
         EXPECT_FALSE(result.has_value());            // Должен вернуться std::nullopt
     }
+
+    Database::clear<User>();
 }
 
 // 8. Тест очистки всех данных таблицы
@@ -149,6 +153,11 @@ TEST_F(DatabaseTest, ClearTableDataBase) {
 
     // Сохраняем еще одну запись
     EXPECT_TRUE(user1.save()); 
+
+    User user2 = User("Петр", "Petr@mail.com");
+
+    // Сохраняем еще одну запись
+    EXPECT_TRUE(user2.save()); 
 
     // Проверяем, что записей теперь две
     EXPECT_EQ(Database::getAll<User>().size(), 3);
