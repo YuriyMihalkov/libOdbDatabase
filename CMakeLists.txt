@@ -89,6 +89,10 @@ endforeach()
 # =====================================================================
 add_library(${PROJECT_NAME} STATIC ${ALL_ODB_SOURCES})
 
+if(MSVC)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ODB_COMPILER)
+endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC 
     "${CMAKE_CURRENT_BINARY_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
