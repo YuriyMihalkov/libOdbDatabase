@@ -10,6 +10,22 @@
 // Определение статического мьютекса
 std::mutex Database::dbMutex;
 
+bool Database::save() {
+    return save_impl<std::remove_reference_t<decltype(*this)>>();
+}
+
+bool Database::actual() {
+    return actual_impl<std::remove_reference_t<decltype(*this)>>();
+}
+
+bool Database::update() {
+    return update_impl<std::remove_reference_t<decltype(*this)>>();
+}
+
+bool Database::remove() {
+    return remove_impl<std::remove_reference_t<decltype(*this)>>();
+}
+
 void Database::dropAllTable() {
     try {
         std::vector<std::string> tables = Database::getTablesBySchema("");
