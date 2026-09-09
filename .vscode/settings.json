@@ -10,8 +10,9 @@
         //"CMAKE_BUILD_TYPE": "Release",
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_POLICY_VERSION_MINIMUM": 3.5,
-        //"SANITIZER_TYPE": "Address",
-        //"SANITIZER_TYPE": "Thread"
+        "ENABLE_SANITIZERS": "ON"
+        // "SANITIZER_TYPE": "Address",
+        // "SANITIZER_TYPE": "Thread"
     },
     "[dockercompose]": {
         "editor.tabSize": 2

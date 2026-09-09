@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.15)
 project(OdbDatabase LANGUAGES CXX)
 
+# Санитайзеры
+option(ENABLE_SANITIZERS "Enable Address and Undefined Behavior Sanitizers" OFF)
+
+if(ENABLE_SANITIZERS)
+    message(STATUS "Building with Address and Undefined Behavior Sanitizers")
+    
+    # 2. Добавляем флаги компиляции и линковки
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -g)
+    add_link_options(-fsanitize=address,undefined)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

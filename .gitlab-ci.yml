@@ -55,7 +55,7 @@ build-debian13:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
-        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON"
         CMAKE_GENERATOR: "Unix Makefiles"
   before_script:
     - ls -la ./
@@ -87,7 +87,7 @@ build-arch-docker:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
-        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON"
         CMAKE_GENERATOR: "Ninja"
   before_script:
     - ls -la ./
@@ -117,7 +117,7 @@ build-windows10:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
-        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON"
   before_script:
     - Get-ChildItem ./                 
     - if (Test-Path build) { Remove-Item -Recurve -Force build }
@@ -150,7 +150,7 @@ build-windows11:
         CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
-        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON"
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON"
   before_script:
     - Get-ChildItem ./                 
     - if (Test-Path build) { Remove-Item -Recurve -Force build }
