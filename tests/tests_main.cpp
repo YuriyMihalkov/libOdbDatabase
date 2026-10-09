@@ -2,7 +2,13 @@
 #include <memory>
 #include <odb/connection.hxx>
 #include <odb/transaction.hxx>
-#include <odb/pgsql/database.hxx>
+#if defined(ODB_DATABASE_TYPE_PGSQL)
+#  include <odb/pgsql/database.hxx>
+#elif defined(ODB_DATABASE_TYPE_SQLITE)
+#  include <odb/sqlite/database.hxx>
+#else
+#  error "КРИТИЧЕСКАЯ ОШИБКА: CMake не передал ни ODB_DATABASE_TYPE_PGSQL, ни ODB_DATABASE_TYPE_SQLITE!"
+#endif
 
 #include "Database.hpp"
 #include "User.hpp"

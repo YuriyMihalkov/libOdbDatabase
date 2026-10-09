@@ -12,6 +12,25 @@ if(ENABLE_SANITIZERS)
     add_link_options(-fsanitize=address,undefined)
 endif()
 
+# =====================================================================
+# 0. Инициализация и обработка опций
+# =====================================================================
+
+# Создаем выпадающий список для GUI-конфигураторов
+set_property(CACHE ODB_DATABASE_TYPE PROPERTY STRINGS "pgsql" "sqlite")
+
+# Создаем выпадающий список для GUI-конфигураторов
+set_property(CACHE ODB_DATABASE_TYPE PROPERTY STRINGS "pgsql" "sqlite")
+
+# Выбираем тип базы данных
+if(ODB_DATABASE_TYPE STREQUAL "pgsql")
+    set(ODB_TARGET_NAME ODB::pgsql)    
+elseif(ODB_DATABASE_TYPE STREQUAL "sqlite")
+    set(ODB_TARGET_NAME ODB::sqlite)
+else()
+    message(FATAL_ERROR "Unknown database type: '${ODB_DATABASE_TYPE}'. Supported types are: pgsql, sqlite")
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -21,7 +40,7 @@ foreach(FILE_PATH ${CMAKE_FILES})
     include(${FILE_PATH})
 endforeach()
 
-find_package(ODB REQUIRED COMPONENTS pgsql)
+find_package(ODB REQUIRED COMPONENTS ${ODB_DATABASE_TYPE})
 
 # Создаем интерфейсный таргет-обертку, если его нет
 if(NOT TARGET ODB::odb)
@@ -32,9 +51,9 @@ if(NOT TARGET ODB::odb)
     )
 endif()
 
-if(NOT TARGET ODB::pgsql)
-    add_library(ODB::pgsql INTERFACE IMPORTED)
-    set_target_properties(ODB::pgsql PROPERTIES
+if(NOT TARGET ${ODB_TARGET_NAME})
+    add_library(${ODB_TARGET_NAME} INTERFACE IMPORTED)
+    set_target_properties(${ODB_TARGET_NAME} PROPERTIES
         INTERFACE_LINK_LIBRARIES "${ODB_PGSQL_LIBRARIES};ODB::odb"
     )
 endif()
@@ -59,7 +78,7 @@ add_custom_command(
            "${CMAKE_CURRENT_BINARY_DIR}/Database-odb.hxx"
            "${CMAKE_CURRENT_BINARY_DIR}/Database-odb.ixx"
     COMMAND ${ODB_EXECUTABLE}
-            --std c++20 --database pgsql --generate-query --generate-schema --schema-format embedded
+            --std c++20 --database ${ODB_DATABASE_TYPE} --generate-query --generate-schema --schema-format embedded
             --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
             -I "${CMAKE_CURRENT_SOURCE_DIR}/include" -I "${CMAKE_CURRENT_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
@@ -84,7 +103,7 @@ foreach(header IN LISTS HANDLER_ENTIRES_PATHS)
                 "${CMAKE_CURRENT_BINARY_DIR}/${name_we}-odb.hxx"
                 "${CMAKE_CURRENT_BINARY_DIR}/${name_we}-odb.ixx"
         COMMAND ${ODB_EXECUTABLE}
-                --std c++20 -d pgsql --generate-query --generate-schema --schema-format embedded
+                --std c++20 -d ${ODB_DATABASE_TYPE} --generate-query --generate-schema --schema-format embedded
                 --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
                 -I "${CMAKE_CURRENT_SOURCE_DIR}/include" 
                 -I "${CMAKE_CURRENT_SOURCE_DIR}" 
@@ -100,18 +119,27 @@ endforeach()
 # =====================================================================
 add_library(${PROJECT_NAME} STATIC ${ALL_ODB_SOURCES})
 
+# Передаем тип базы данных в качестве константы
+if(ODB_DATABASE_TYPE STREQUAL "pgsql")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ODB_DATABASE_TYPE_PGSQL)
+elseif(ODB_DATABASE_TYPE STREQUAL "sqlite")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ODB_DATABASE_TYPE_SQLITE)
+endif()
+
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PRIVATE ODB_COMPILER)
 endif()
 
-target_include_directories(${PROJECT_NAME} PUBLIC 
-    "${CMAKE_CURRENT_BINARY_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    "${ENTIRES_PATHS}"
+target_include_directories(${PROJECT_NAME} 
+    PUBLIC 
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/config"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_BINARY_DIR}"
+        "${ENTIRES_PATHS}"
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ODB::odb ODB::pgsql)
+target_link_libraries(${PROJECT_NAME} PUBLIC ODB::odb ${ODB_TARGET_NAME})
 
 # =====================================================================
 # 4. Тесты

@@ -10,7 +10,8 @@
         //"CMAKE_BUILD_TYPE": "Release",
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_POLICY_VERSION_MINIMUM": 3.5,
-        "ENABLE_SANITIZERS": "ON"
+        "ENABLE_SANITIZERS": "ON",
+        "ODB_DATABASE_TYPE": "sqlite"
         // "SANITIZER_TYPE": "Address",
         // "SANITIZER_TYPE": "Thread"
     },
