@@ -1,7 +1,10 @@
 stages:
   - show_dir
-  - build
-  - test
+  - build_pgsql
+  - test_pgsql
+  - clear
+  - build_sqlite
+  - test_sqIte
   # - distr
 
 # ==========================================
@@ -37,10 +40,235 @@ show_dir_win11:
     - Windows11
 
 # ==========================================
-# СБОРКА 
+# СБОРКА PGSQL
 # ==========================================
 build-debian13:
-  stage: build
+  stage: build_pgsql
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+        CMAKE_GENERATOR: "Unix Makefiles"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON -DODB_DATABASE_TYPE:STRING=sqlite"
+        CMAKE_GENERATOR: "Unix Makefiles"
+  before_script:
+    - ls -la ./
+    - mkdir -p build
+  script:
+    - cd build
+    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - Debian13Runner
+
+build-arch-docker:
+  stage: build_pgsql
+  image: ubuntu2204_forprojectcontrol-cpp-dev
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+        CMAKE_GENERATOR: "Ninja"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON -DODB_DATABASE_TYPE:STRING=sqlite"
+        CMAKE_GENERATOR: "Ninja"
+  before_script:
+    - ls -la ./
+    - mkdir -p build
+  script:
+    - cd build
+    - cmake ${CMAKE_FLAGS} .. && cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - Ubuntu.24
+      
+build-windows10:
+  stage: build_pgsql
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+    CMAKE_GENERATOR: "MinGW Makefiles" # Вынесли сюда, теперь работает для всех правил
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON -DODB_DATABASE_TYPE:STRING=sqlite"
+  before_script:
+    - Get-ChildItem ./                 
+    - if (Test-Path build) { Remove-Item -Recurve -Force build }
+    - New-Item -ItemType Directory -Force -Path build
+  script:
+    - cd build
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
+    - $env:CPATH = "C:\Dev\orm_odb\include"
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" .. 
+    - cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - Windows10
+
+build-windows11:
+  stage: build_pgsql
+  interruptible: true
+  variables:
+    GIT_LFS_SKIP_SMUDGE: 0
+    CMAKE_GENERATOR: "MinGW Makefiles" # Вынесли сюда, теперь работает для всех правил
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE" 
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=Release -DBUILD_DOXYGEN_DOC=ON -DENABLE_SANITIZERS=ON -DODB_DATABASE_TYPE:STRING=sqlite"
+  before_script:
+    - Get-ChildItem ./                 
+    - if (Test-Path build) { Remove-Item -Recurve -Force build }
+    - New-Item -ItemType Directory -Force -Path build
+  script:
+    - cd build
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
+    - $env:CPATH = "C:\Dev\orm_odb\include"
+    - cmake $env:CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=C:/Dev/orm_odb;C:/Dev/gtest" .. 
+    - cmake --build .
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  tags:
+    - Windows11
+
+# ==========================================
+# ТЕСТИРОВАНИЕ PGSQL
+# ==========================================
+test-debian13:
+  stage: test_pgsql
+  interruptible: true
+  needs:
+    - job: build-debian13 
+      artifacts: true
+  script:
+    - cd build
+    - ctest --output-on-failure 
+  tags:
+    - Debian13Runner
+
+test-arch-docker:
+  stage: test_pgsql
+  image: ubuntu2204_forprojectcontrol-cpp-dev
+  interruptible: true
+  needs: 
+    - job: build-arch-docker
+      artifacts: true
+  script:
+    - cd build
+    - ctest --output-on-failure
+  tags:
+    - Ubuntu.24
+
+test-windows10:
+  stage: test_pgsql
+  interruptible: true
+  needs:
+    - job: build-windows10 
+      artifacts: true
+  script:
+    - if (Test-Path build) { cd build }
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
+    - ctest --output-on-failure
+  tags:
+    - Windows10
+
+test-windows11:
+  stage: test_pgsql
+  interruptible: true
+  needs:
+    - job: build-windows11 
+      artifacts: true
+  script:
+    - if (Test-Path build) { cd build }
+    - $env:PATH = "C:\Dev\MinGW\bin;C:\Dev\orm_odb\bin;" + $env:PATH
+    - ctest --output-on-failure
+  tags:
+    - Windows11
+
+# ==========================================
+# ОЧИСТКА ВСЕХ СБОРОК
+# ==========================================
+clear-debian13:
+  stage:
+    - clear
+  script:
+    - cd ..
+    - rm -rf ./build
+  tags:
+    - Debian13Runner
+
+clear-arch-docker:
+  stage:
+    - clear
+  script:
+    - cd ..
+    - rm -rf ./build
+  tags:
+    - Ubuntu.24
+
+clear-windows10:
+  stage:
+    - clear
+  script:
+    - cd ..
+    - rm -rf ./build
+  tags:
+    - Windows10
+
+clear-windows11:
+  stage:
+    - clear
+  script:
+    - cd ..
+    - rm -rf ./build
+  tags:
+    - Windows11
+
+# ==========================================
+# СБОРКА SQLITE
+# ==========================================
+build-debian13:
+  stage: build_sqlite
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
@@ -71,7 +299,7 @@ build-debian13:
     - Debian13Runner
 
 build-arch-docker:
-  stage: build
+  stage: build_sqlite
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
   variables:
@@ -103,7 +331,7 @@ build-arch-docker:
     - Ubuntu.24
       
 build-windows10:
-  stage: build
+  stage: build_sqlite
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
@@ -136,7 +364,7 @@ build-windows10:
     - Windows10
 
 build-windows11:
-  stage: build
+  stage: build_sqlite
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
@@ -169,10 +397,10 @@ build-windows11:
     - Windows11
 
 # ==========================================
-# ТЕСТИРОВАНИЕ 
+# ТЕСТИРОВАНИЕ SQLITE
 # ==========================================
 test-debian13:
-  stage: test
+  stage: test_sqIte
   interruptible: true
   needs:
     - job: build-debian13 
@@ -184,7 +412,7 @@ test-debian13:
     - Debian13Runner
 
 test-arch-docker:
-  stage: test
+  stage: test_sqIte
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
   needs: 
@@ -197,7 +425,7 @@ test-arch-docker:
     - Ubuntu.24
 
 test-windows10:
-  stage: test
+  stage: test_sqIte
   interruptible: true
   needs:
     - job: build-windows10 
@@ -210,7 +438,7 @@ test-windows10:
     - Windows10
 
 test-windows11:
-  stage: test
+  stage: test_sqIte
   interruptible: true
   needs:
     - job: build-windows11 

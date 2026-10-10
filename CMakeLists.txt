@@ -16,11 +16,9 @@ endif()
 # 0. Инициализация и обработка опций
 # =====================================================================
 
-# Создаем выпадающий список для GUI-конфигураторов
-set_property(CACHE ODB_DATABASE_TYPE PROPERTY STRINGS "pgsql" "sqlite")
-
-# Создаем выпадающий список для GUI-конфигураторов
-set_property(CACHE ODB_DATABASE_TYPE PROPERTY STRINGS "pgsql" "sqlite")
+if(NOT DEFINED ODB_DATABASE_TYPE)
+    set(ODB_DATABASE_TYPE "pgsql" CACHE STRING "Type of database" FORCE)
+endif()
 
 # Выбираем тип базы данных
 if(ODB_DATABASE_TYPE STREQUAL "pgsql")
