@@ -42,7 +42,7 @@ show_dir_win11:
 # ==========================================
 # СБОРКА PGSQL
 # ==========================================
-build-debian13:
+build-pgsql_debian13:
   stage: build_pgsql
   interruptible: true
   variables:
@@ -73,7 +73,7 @@ build-debian13:
   tags:
     - Debian13Runner
 
-build-arch-docker:
+build-pgsql_arch-docker:
   stage: build_pgsql
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
@@ -105,7 +105,7 @@ build-arch-docker:
   tags:
     - Ubuntu.24
       
-build-windows10:
+build-pgsql_windows10:
   stage: build_pgsql
   interruptible: true
   variables:
@@ -138,7 +138,7 @@ build-windows10:
   tags:
     - Windows10
 
-build-windows11:
+build-pgsql_windows11:
   stage: build_pgsql
   interruptible: true
   variables:
@@ -174,7 +174,7 @@ build-windows11:
 # ==========================================
 # ТЕСТИРОВАНИЕ PGSQL
 # ==========================================
-test-debian13:
+test-pgsql_debian13:
   stage: test_pgsql
   interruptible: true
   needs:
@@ -186,7 +186,7 @@ test-debian13:
   tags:
     - Debian13Runner
 
-test-arch-docker:
+test-pgsql_arch-docker:
   stage: test_pgsql
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
@@ -199,7 +199,7 @@ test-arch-docker:
   tags:
     - Ubuntu.24
 
-test-windows10:
+test-pgsql_windows10:
   stage: test_pgsql
   interruptible: true
   needs:
@@ -212,7 +212,7 @@ test-windows10:
   tags:
     - Windows10
 
-test-windows11:
+test-pgsql_windows11:
   stage: test_pgsql
   interruptible: true
   needs:
@@ -248,7 +248,7 @@ clear-windows10:
   stage: clear
   script:
     - cd ..
-    - rm -rf ./build
+    - rmdir /s /q build
   tags:
     - Windows10
 
@@ -256,14 +256,14 @@ clear-windows11:
   stage: clear
   script:
     - cd ..
-    - rm -rf ./build
+    - rmdir /s /q build
   tags:
     - Windows11
 
 # ==========================================
 # СБОРКА SQLITE
 # ==========================================
-build-debian13:
+build-sqlite_debian13:
   stage: build_sqlite
   interruptible: true
   variables:
@@ -294,7 +294,7 @@ build-debian13:
   tags:
     - Debian13Runner
 
-build-arch-docker:
+build-sqlite_arch-docker:
   stage: build_sqlite
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
@@ -326,7 +326,7 @@ build-arch-docker:
   tags:
     - Ubuntu.24
       
-build-windows10:
+build-sqlite_windows10:
   stage: build_sqlite
   interruptible: true
   variables:
@@ -359,7 +359,7 @@ build-windows10:
   tags:
     - Windows10
 
-build-windows11:
+build-sqlite_windows11:
   stage: build_sqlite
   interruptible: true
   variables:
@@ -395,7 +395,7 @@ build-windows11:
 # ==========================================
 # ТЕСТИРОВАНИЕ SQLITE
 # ==========================================
-test-debian13:
+test-sqIte_debian13:
   stage: test_sqIte
   interruptible: true
   needs:
@@ -407,7 +407,7 @@ test-debian13:
   tags:
     - Debian13Runner
 
-test-arch-docker:
+test-sqIte_arch-docker:
   stage: test_sqIte
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
@@ -420,7 +420,7 @@ test-arch-docker:
   tags:
     - Ubuntu.24
 
-test-windows10:
+test-sqIte_windows10:
   stage: test_sqIte
   interruptible: true
   needs:
@@ -433,7 +433,7 @@ test-windows10:
   tags:
     - Windows10
 
-test-windows11:
+test-sqIte_windows11:
   stage: test_sqIte
   interruptible: true
   needs:
