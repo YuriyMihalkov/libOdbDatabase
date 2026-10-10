@@ -178,7 +178,7 @@ test-pgsql_debian13:
   stage: test_pgsql
   interruptible: true
   needs:
-    - job: build-debian13 
+    - job: build-pgsql_debian13 
       artifacts: true
   script:
     - cd build
@@ -191,7 +191,7 @@ test-pgsql_arch-docker:
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
   needs: 
-    - job: build-arch-docker
+    - job: build-pgsql_arch-docker
       artifacts: true
   script:
     - cd build
@@ -203,7 +203,7 @@ test-pgsql_windows10:
   stage: test_pgsql
   interruptible: true
   needs:
-    - job: build-windows10 
+    - job: build-pgsql_windows10 
       artifacts: true
   script:
     - if (Test-Path build) { cd build }
@@ -216,7 +216,7 @@ test-pgsql_windows11:
   stage: test_pgsql
   interruptible: true
   needs:
-    - job: build-windows11 
+    - job: build-pgsql_windows11 
       artifacts: true
   script:
     - if (Test-Path build) { cd build }
@@ -399,7 +399,7 @@ test-sqIte_debian13:
   stage: test_sqIte
   interruptible: true
   needs:
-    - job: build-debian13 
+    - job: build-sqlite_debian13 
       artifacts: true
   script:
     - cd build
@@ -412,7 +412,7 @@ test-sqIte_arch-docker:
   image: ubuntu2204_forprojectcontrol-cpp-dev
   interruptible: true
   needs: 
-    - job: build-arch-docker
+    - job: build-sqlite_arch-docker
       artifacts: true
   script:
     - cd build
@@ -424,7 +424,7 @@ test-sqIte_windows10:
   stage: test_sqIte
   interruptible: true
   needs:
-    - job: build-windows10 
+    - job: build-sqlite_windows10 
       artifacts: true
   script:
     - if (Test-Path build) { cd build }
@@ -437,7 +437,7 @@ test-sqIte_windows11:
   stage: test_sqIte
   interruptible: true
   needs:
-    - job: build-windows11 
+    - job: build-sqlite_windows11 
       artifacts: true
   script:
     - if (Test-Path build) { cd build }
