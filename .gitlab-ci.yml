@@ -229,8 +229,7 @@ test-windows11:
 # ОЧИСТКА ВСЕХ СБОРОК
 # ==========================================
 clear-debian13:
-  stage:
-    - clear
+  stage: clear
   script:
     - cd ..
     - rm -rf ./build
@@ -238,8 +237,7 @@ clear-debian13:
     - Debian13Runner
 
 clear-arch-docker:
-  stage:
-    - clear
+  stage: clear
   script:
     - cd ..
     - rm -rf ./build
@@ -247,8 +245,7 @@ clear-arch-docker:
     - Ubuntu.24
 
 clear-windows10:
-  stage:
-    - clear
+  stage: clear
   script:
     - cd ..
     - rm -rf ./build
@@ -256,8 +253,7 @@ clear-windows10:
     - Windows10
 
 clear-windows11:
-  stage:
-    - clear
+  stage: clear
   script:
     - cd ..
     - rm -rf ./build
