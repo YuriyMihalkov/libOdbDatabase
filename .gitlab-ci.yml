@@ -230,6 +230,8 @@ test-pgsql_windows11:
 # ==========================================
 clear-debian13:
   stage: clear
+  needs:
+    - job: test-pgsql_debian13
   script:
     - cd ..
     - rm -rf ./build
@@ -238,6 +240,8 @@ clear-debian13:
 
 clear-arch-docker:
   stage: clear
+  needs:
+    - job: test-pgsql_arch-docker
   script:
     - cd ..
     - rm -rf ./build
@@ -246,6 +250,8 @@ clear-arch-docker:
 
 clear-windows10:
   stage: clear
+  needs:
+    - job: test-pgsql_windows10
   script:
     - cd ..
     - if (Test-Path ./build) { Remove-Item -Recurse -Force ./build }
@@ -254,6 +260,8 @@ clear-windows10:
 
 clear-windows11:
   stage: clear
+  needs:
+    - job: test-pgsql_windows11
   script:
     - cd ..
     - if (Test-Path ./build) { Remove-Item -Recurse -Force ./build }
@@ -268,7 +276,8 @@ build-sqlite_debian13:
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
-  needs: []
+  needs: 
+    - job: clear-debian13
   rules:
     - if: $CI_COMMIT_TAG
       variables:
@@ -300,7 +309,8 @@ build-sqlite_arch-docker:
   interruptible: true
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
-  needs: []
+  needs: 
+    - job: clear-arch-docker
   rules:
     - if: $CI_COMMIT_TAG
       variables:
@@ -332,6 +342,8 @@ build-sqlite_windows10:
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
     CMAKE_GENERATOR: "MinGW Makefiles" # Вынесли сюда, теперь работает для всех правил
+  needs: 
+    - job: clear-windows10
   rules:
     - if: $CI_COMMIT_TAG
       variables:
@@ -365,6 +377,8 @@ build-sqlite_windows11:
   variables:
     GIT_LFS_SKIP_SMUDGE: 0
     CMAKE_GENERATOR: "MinGW Makefiles" # Вынесли сюда, теперь работает для всех правил
+  needs: 
+    - job: clear-windows11
   rules:
     - if: $CI_COMMIT_TAG
       variables:
