@@ -38,7 +38,11 @@ function(find_odb_api component)
     string(TOUPPER "${component}" component_u)
     set(ODB_${component_u}_FOUND FALSE PARENT_SCOPE)
 
-    pkg_check_modules(PC_ODB_${component} QUIET "libodb-${component}")
+    if("${component}" STREQUAL "sqlite")
+        pkg_check_modules(PC_ODB_${component} QUIET "libodb-sqlite3" "libodb-sqlite")
+    else()
+        pkg_check_modules(PC_ODB_${component} QUIET "libodb-${component}")
+    endif()
 
     find_path(ODB_${component}_INCLUDE_DIR
         NAMES odb/${component}/version.hxx
@@ -46,11 +50,19 @@ function(find_odb_api component)
             ${ODB_LIBODB_INCLUDE_DIRS}
             ${PC_ODB_${component}_INCLUDE_DIRS})
 
-    find_library(ODB_${component}_LIBRARY
-        NAMES odb-${component} libodb-${component}
-        HINTS
-            ${ODB_LIBRARY_PATH}
-            ${PC_ODB_${component}_LIBRARY_DIRS})
+   if("${component}" STREQUAL "sqlite")
+        find_library(ODB_${component}_LIBRARY
+            NAMES odb-sqlite3 odb-sqlite libodb-sqlite3 libodb-sqlite
+            HINTS
+                ${ODB_LIBRARY_PATH}
+                ${PC_ODB_${component}_LIBRARY_DIRS})
+    else()
+        find_library(ODB_${component}_LIBRARY
+            NAMES odb-${component} libodb-${component}
+            HINTS
+                ${ODB_LIBRARY_PATH}
+                ${PC_ODB_${component}_LIBRARY_DIRS})
+    endif()
 
     set(ODB_${component_u}_INCLUDE_DIRS ${ODB_${component}_INCLUDE_DIR} CACHE STRING "ODB ${component} include dirs")
     set(ODB_${component_u}_LIBRARIES ${ODB_${component}_LIBRARY} CACHE STRING "ODB ${component} libraries")
