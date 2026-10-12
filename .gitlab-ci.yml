@@ -248,7 +248,7 @@ clear-windows10:
   stage: clear
   script:
     - cd ..
-    - rmdir /s /q build
+    - if (Test-Path ./build) { Remove-Item -Recurse -Force ./build }
   tags:
     - Windows10
 
@@ -256,7 +256,7 @@ clear-windows11:
   stage: clear
   script:
     - cd ..
-    - rmdir /s /q build
+    - if (Test-Path ./build) { Remove-Item -Recurse -Force ./build }
   tags:
     - Windows11
 
