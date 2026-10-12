@@ -1,0 +1,15 @@
+services:
+  run_tests:
+    image: my-cpp-odb-env:latest
+    container_name: odb_tests_container
+    environment:
+      - DATABASE_URL=postgresql://dev_user:dev_password@192.168.1.2:5432/mydb_dev
+    # Монтируем текущую папку с проектом внутрь контейнера в директорию /app
+    volumes:
+      - .:/app
+    working_dir: /app
+    # Запускаем сборку и тесты внутри контейнера
+    command: >
+      sh -c "echo 'Сборка и запуск тестов ODB...' &&
+             mkdir -p build && cd build &&
+             cmake .. && make && ./run_tests"
