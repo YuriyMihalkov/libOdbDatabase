@@ -94,6 +94,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${ENTIRES_PATHS}"
+    ${ODB_INCLUDE_DIRS}  
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ODB::odb ODB::pgsql)
