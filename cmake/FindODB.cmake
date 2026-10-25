@@ -122,13 +122,17 @@ function(find_odb_api component)
     string(TOUPPER "${component}" component_u)
     set(ODB_${component_u}_FOUND FALSE PARENT_SCOPE)
 
+    # Явно получаем текущие значения из родительской области через PARENT_SCOPE-чтение
+    set(_odb_inc_dirs ${ODB_INCLUDE_DIRS})
+    set(_odb_libs     ${ODB_LIBRARIES})
+
     pkg_check_modules(PC_ODB_${component} QUIET "libodb-${component}")
 
     find_path(ODB_${component}_INCLUDE_DIR
         NAMES odb/${component}/version.hxx
         HINTS
             ${ODB_INCLUDE_PATH}
-            ${ODB_LIBODB_INCLUDE_DIRS}
+            ${_odb_inc_dirs}
             ${PC_ODB_${component}_INCLUDE_DIRS}
             "${_odb_root_from_exe}/include")
 
@@ -148,14 +152,14 @@ function(find_odb_api component)
         set(ODB_${component_u}_FOUND TRUE PARENT_SCOPE)
         set(ODB_${component}_FOUND   TRUE PARENT_SCOPE)
 
-        list(APPEND ODB_INCLUDE_DIRS ${ODB_${component_u}_INCLUDE_DIRS})
-        list(REMOVE_DUPLICATES ODB_INCLUDE_DIRS)
-        set(ODB_INCLUDE_DIRS ${ODB_INCLUDE_DIRS} PARENT_SCOPE)
+        list(APPEND _odb_inc_dirs ${ODB_${component_u}_INCLUDE_DIRS})
+        list(REMOVE_DUPLICATES _odb_inc_dirs)
+        set(ODB_INCLUDE_DIRS ${_odb_inc_dirs} PARENT_SCOPE)
 
         if(ODB_${component_u}_LIBRARIES)
-            list(APPEND ODB_LIBRARIES ${ODB_${component_u}_LIBRARIES})
-            list(REMOVE_DUPLICATES ODB_LIBRARIES)
-            set(ODB_LIBRARIES ${ODB_LIBRARIES} PARENT_SCOPE)
+            list(APPEND _odb_libs ${ODB_${component_u}_LIBRARIES})
+            list(REMOVE_DUPLICATES _odb_libs)
+            set(ODB_LIBRARIES ${_odb_libs} PARENT_SCOPE)
         endif()
     endif()
 endfunction()
