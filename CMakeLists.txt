@@ -50,7 +50,9 @@ add_custom_command(
     COMMAND ${ODB_EXECUTABLE}
             --std c++20 --database pgsql --generate-query --generate-schema --schema-format embedded
             --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
-            -I "${CMAKE_CURRENT_SOURCE_DIR}/include" -I "${CMAKE_CURRENT_SOURCE_DIR}"
+            -I "${ODB_INCLUDE_DIRS}"                                    # <--- ДОБАВИТЬ
+            -I "${CMAKE_CURRENT_SOURCE_DIR}/include" 
+            -I "${CMAKE_CURRENT_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
     VERBATIM
