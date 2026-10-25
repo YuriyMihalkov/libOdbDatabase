@@ -122,7 +122,8 @@ function(find_odb_api component)
     string(TOUPPER "${component}" component_u)
     set(ODB_${component_u}_FOUND FALSE PARENT_SCOPE)
 
-    # Явно получаем текущие значения из родительской области через PARENT_SCOPE-чтение
+    # Копируем текущие значения из родительской области в локальные переменные,
+    # чтобы накапливать include-директории компонентов без потери базовых.
     set(_odb_inc_dirs ${ODB_INCLUDE_DIRS})
     set(_odb_libs     ${ODB_LIBRARIES})
 
@@ -163,6 +164,10 @@ function(find_odb_api component)
         endif()
     endif()
 endfunction()
+
+message(STATUS "=== ODB_INCLUDE_DIRS = '${ODB_INCLUDE_DIRS}'")
+message(STATUS "=== ODB_LIBODB_INCLUDE_DIRS = '${ODB_LIBODB_INCLUDE_DIRS}'")
+message(STATUS "=== ODB_PGSQL_INCLUDE_DIRS = '${ODB_PGSQL_INCLUDE_DIRS}'")
 
 foreach(component ${ODB_FIND_COMPONENTS})
     find_odb_api(${component})
