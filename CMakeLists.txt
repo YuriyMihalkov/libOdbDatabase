@@ -77,6 +77,7 @@ foreach(header IN LISTS HANDLER_ENTIRES_PATHS)
         COMMAND ${ODB_EXECUTABLE}
                 --std c++20 -d pgsql --generate-query --generate-schema --schema-format embedded
                 --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
+                -I "${ODB_INCLUDE_DIRS}"
                 -I "${CMAKE_CURRENT_SOURCE_DIR}/include" 
                 -I "${CMAKE_CURRENT_SOURCE_DIR}" 
                 -I "${ENTIRES_PATHS}"
