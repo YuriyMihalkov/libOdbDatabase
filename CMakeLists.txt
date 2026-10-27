@@ -78,7 +78,9 @@ add_custom_command(
     COMMAND ${ODB_EXECUTABLE}
             --std c++20 --database ${ODB_DATABASE_TYPE} --generate-query --generate-schema --schema-format embedded
             --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
-            -I "${CMAKE_CURRENT_SOURCE_DIR}/include" -I "${CMAKE_CURRENT_SOURCE_DIR}"
+            -I "${ODB_INCLUDE_DIRS}"
+            -I "${CMAKE_CURRENT_SOURCE_DIR}/include"
+            -I "${CMAKE_CURRENT_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp"
     VERBATIM
@@ -103,6 +105,7 @@ foreach(header IN LISTS HANDLER_ENTIRES_PATHS)
         COMMAND ${ODB_EXECUTABLE}
                 --std c++20 -d ${ODB_DATABASE_TYPE} --generate-query --generate-schema --schema-format embedded
                 --output-dir "${CMAKE_CURRENT_BINARY_DIR}"
+                -I "${ODB_INCLUDE_DIRS}"
                 -I "${CMAKE_CURRENT_SOURCE_DIR}/include" 
                 -I "${CMAKE_CURRENT_SOURCE_DIR}" 
                 -I "${ENTIRES_PATHS}"
@@ -135,6 +138,7 @@ target_include_directories(${PROJECT_NAME}
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
         "${CMAKE_CURRENT_BINARY_DIR}"
         "${ENTIRES_PATHS}"
+	${ODB_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ODB::odb ${ODB_TARGET_NAME})
